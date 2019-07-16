@@ -18,14 +18,19 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // 백그라운드 영상 재생 함수
+        playBackgroundVideo();
+    }
+
+    // 백그라운드 영상 재생 함수
+    public void playBackgroundVideo(){
         videoBG = (VideoView)findViewById(R.id.title_video);
         Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.bg_title_video);
-
         videoBG.setVideoURI(uri);
         videoBG.start();
-
         videoBG.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
+            // 반복재생
             public void onPrepared(MediaPlayer mediaPlayer) {
                 mediaPlayer.setLooping(true);
             }
