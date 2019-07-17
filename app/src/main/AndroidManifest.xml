@@ -23,7 +23,8 @@
 
         <meta-data
             android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
+            android:resource="@array/preloaded_fonts"
+            android:value="AIzaSyBH4j9WQjv1DW5Eq3wL3THP_bx3AAniRQY"/>
     </application>
 
 </manifest>
