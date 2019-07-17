@@ -12,7 +12,6 @@
         android:icon="@drawable/ic_home_black_24dp"
         android:title="@string/title_home" />
 
-
     <item
         android:id="@+id/navigation_setting"
         android:icon="@drawable/ic_settings_24dp"

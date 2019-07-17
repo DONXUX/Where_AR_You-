@@ -18,7 +18,6 @@ public class LoginActivity extends AppCompatActivity {
     private VideoView videoBG;
     private Button Sign_in_btn;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +39,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // 백그라운드 영상 재생 함수
+    // 백그라운드 영상 재생 메소드
     public void playBackgroundVideo(){
         videoBG = (VideoView)findViewById(R.id.title_video);
         Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.bg_title_video);
