@@ -11,20 +11,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"></activity>
         <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity android:name=".MainActivity">
-
         </activity>
 
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts"
-            android:value="AIzaSyBH4j9WQjv1DW5Eq3wL3THP_bx3AAniRQY"/>
+            android:value="AIzaSyBH4j9WQjv1DW5Eq3wL3THP_bx3AAniRQY" />
     </application>
 
 </manifest>
