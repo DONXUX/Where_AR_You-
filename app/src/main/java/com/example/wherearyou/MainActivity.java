@@ -1,10 +1,7 @@
 package com.example.wherearyou;
 
-import android.media.MediaPlayer;
-import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.VideoView;
 
 /*
     메인화면 기능을 관리하는 클래스
