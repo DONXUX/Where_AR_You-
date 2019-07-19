@@ -11,17 +11,16 @@
     <LinearLayout
         android:id="@+id/ui_friend_info"
         android:layout_width="match_parent"
-        android:layout_height="96dp"
+        android:layout_height="64dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginBottom="8dp"
         android:gravity="left"
         android:orientation="horizontal">
 
         <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/friend_photo"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
+            android:layout_width="64dp"
+            android:layout_height="match_parent"
             android:paddingTop="8dp"
             android:paddingRight="8dp"
             android:paddingBottom="8dp"
@@ -31,22 +30,22 @@
 
         <TextView
             android:id="@+id/friend_name"
-            android:layout_width="160dp"
+            android:layout_width="169dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center|start"
-            android:paddingHorizontal="24dp"
+            android:paddingHorizontal="8dp"
             android:text="김좆슨"
-            android:textSize="20dp" />
+            android:textSize="18dp" />
 
         <Button
             android:id="@+id/button"
-            android:layout_width="40dp"
-            android:layout_height="38dp"
+            android:layout_width="3dp"
+            android:layout_height="35dp"
             android:layout_weight="1"
             android:background="@drawable/rounded_button"
             android:text="찾기"
-            android:textSize="14dp" />
+            android:textSize="12dp" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>
