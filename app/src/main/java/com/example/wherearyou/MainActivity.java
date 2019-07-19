@@ -1,10 +1,15 @@
 package com.example.wherearyou;
 
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
+import android.content.Context;
 import android.os.Bundle;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.annotation.Nullable;
@@ -18,9 +23,9 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.Toast;
 
+// 메인 화면 액티비티 클래스
 public class MainActivity extends AppCompatActivity {
     FragmentManager fm;
     FragmentTransaction tran;
@@ -41,8 +46,6 @@ public class MainActivity extends AppCompatActivity {
         fragSettings = new FragSettings();
         // 초기설정화면 표시(홈)
         setFrag(0);
-
-        // TODO: 지도 연동 (김학률)
     }
 
     // 하단 네비게이션 바 리스너 메소드
@@ -91,17 +94,90 @@ public class MainActivity extends AppCompatActivity {
     }
 }
 
-
 // 홈 화면 플레그먼트 클래스
-class FragHome extends Fragment {
+class FragHome extends Fragment implements OnMapReadyCallback {
     View view;
+    private MapView mapView = null;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.layout_home, container, false);
 
+        mapView = (MapView)view.findViewById(R.id.map);
+        mapView.getMapAsync(this);
+
         return view;
     }
+
+    // 이하 Google Map API 메소드
+    @Override
+    public void onStart() {
+        super.onStart();
+        mapView.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mapView.onStop();
+    }
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mapView.onLowMemory();
+    }
+
+    @Override
+    // 액티비티가 처음 생성될 때 실행되는 메소드
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        MapsInitializer.initialize(getActivity().getApplicationContext());
+
+        if(mapView != null) {
+            mapView.onCreate(savedInstanceState);
+        }
+    }
+
+    // 구글 맵 초기설정 메소드
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        LatLng SEOUL = new LatLng(37.56, 126.97);
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(SEOUL);
+        markerOptions.title("여기는 서울이다 씨발");
+        markerOptions.snippet("여기는 씨발 서울이다");
+        googleMap.addMarker(markerOptions);
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(SEOUL));
+        googleMap.animateCamera(CameraUpdateFactory.zoomTo(13));
+
+        // TODO : 사용자 위치 정보 권한 획득, 현재 위치 View
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
 // 친구 화면 플레그먼트 클래스

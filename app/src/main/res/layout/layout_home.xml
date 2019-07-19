@@ -21,9 +21,9 @@
         app:srcCompat="@drawable/ic_camera_24dp" />
 
     <com.google.android.gms.maps.MapView
-        android:id="@+id/mapView"
-        android:layout_width="396dp"
-        android:layout_height="721dp"
+        android:id="@+id/map"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
