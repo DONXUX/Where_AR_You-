@@ -25,4 +25,19 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingTop="12dp">
+
+        <Button
+            android:id="@+id/Google_Sign_out"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorAccent"
+            android:text="로그아웃"
+            android:textSize="18sp" />
+    </LinearLayout>
+
 </LinearLayout>
