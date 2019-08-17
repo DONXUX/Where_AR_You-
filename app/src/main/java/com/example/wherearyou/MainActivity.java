@@ -32,6 +32,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -134,6 +138,8 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
     private MapView mapView = null;
     private GoogleMap mGoogleMap = null;
     private Marker currentMarker = null;
+    private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
 
     private static final String TAG = "googlemap_example";
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
@@ -159,6 +165,8 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
         mapView = (MapView)mLayout.findViewById(R.id.map);
         mapView.getMapAsync(this);
 
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
 
         Log.d(TAG, "onCreate");
 
@@ -332,11 +340,21 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
     public void setCurrentLocation(Location location, String markerTitle, String markerSnippet){
         if(currentMarker != null)currentMarker.remove();
 
+
+        /////////////////////////////////////////////////DB에 위치 전달///////////////////////////////////
+        DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference userRef = mRootRef.child("User");
+        DatabaseReference locationRef = userRef.child(currentUser.getPhoneNumber());
+
+        locationRef.setValue(location.getLatitude() + ", " + location.getLongitude());
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+
+
         LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(currentLatLng);
         markerOptions.title(markerTitle);
-        markerOptions.snippet(markerSnippet);
+        markerOptions.snippet(currentUser.getDisplayName());
         markerOptions.draggable(true);
 
         currentMarker = mGoogleMap.addMarker(markerOptions);

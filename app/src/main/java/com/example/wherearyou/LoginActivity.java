@@ -6,6 +6,7 @@ import android.media.MediaPlayer;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,6 +29,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 
@@ -40,6 +42,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private static final int RC_SIGN_IN = 100;
     private FirebaseAuth mAuth;
     private GoogleApiClient mGoogleApiClient;
+    private static final String TAG = "Login Activity";
 
     private VideoView videoBG;
     private Button Sign_in_btn;
@@ -82,6 +85,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.bg_title_video);
         videoBG.setVideoURI(uri);
         videoBG.start();
+        Log.d(TAG, "영상시작: ");
         videoBG.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             // 반복재생
@@ -89,6 +93,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 mediaPlayer.setLooping(true);
             }
         });
+    }
+
+    public void stopBackgroundVideo(){
+        videoBG = (VideoView)findViewById(R.id.title_video);
+        Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.bg_title_video);
+        videoBG.setVideoURI(uri);
+        videoBG.stopPlayback();
+        Log.d(TAG, "영상멈춤: ");
     }
 
     @Override
@@ -117,6 +129,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             Toast.makeText(LoginActivity.this, "인증 실패", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(LoginActivity.this, "구글 로그인 인증 성공", Toast.LENGTH_SHORT).show();
+
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
                         }
@@ -127,5 +140,25 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        try {
+            stopBackgroundVideo();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        try {
+            playBackgroundVideo();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
