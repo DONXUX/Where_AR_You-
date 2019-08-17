@@ -5,12 +5,10 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.Camera;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -51,15 +49,15 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -140,6 +138,7 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
     private Marker currentMarker = null;
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
+    private String EmailToId;
 
     private static final String TAG = "googlemap_example";
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
@@ -168,6 +167,11 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
 
+        Pattern p = Pattern.compile("([a-zA-Z0-9]*)@(.*)");
+        Matcher m = p.matcher(currentUser.getEmail());
+        if(m.find()){
+            EmailToId = m.group(1);
+        }
         Log.d(TAG, "onCreate");
 
         locationRequest = new LocationRequest().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(UPDATE_INTERVAL_MS).setFastestInterval(FASTEST_UPDATE_INTERVAL_MS);
@@ -218,7 +222,7 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
 
                 Log.d(TAG, "onLocationResult: " + markerSnippet);
 
-                setCurrentLocation(location, markerTitle, markerSnippet);
+                setCurrentLocation(location, markerTitle);
 
                 mCurrentLocation = location;
             }
@@ -337,16 +341,16 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
-    public void setCurrentLocation(Location location, String markerTitle, String markerSnippet){
+    public void setCurrentLocation(Location location, String markerTitle){
         if(currentMarker != null)currentMarker.remove();
 
 
         /////////////////////////////////////////////////DB에 위치 전달///////////////////////////////////
         DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
         DatabaseReference userRef = mRootRef.child("User");
-        DatabaseReference locationRef = userRef.child(currentUser.getPhoneNumber());
+        DatabaseReference locationRef = userRef.child(EmailToId);
 
-        locationRef.setValue(location.getLatitude() + ", " + location.getLongitude());
+        locationRef.setValue(location.getLatitude() + ", " + location.getLongitude() + ", " + markerTitle);
         //////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -354,7 +358,7 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(currentLatLng);
         markerOptions.title(markerTitle);
-        markerOptions.snippet(currentUser.getDisplayName());
+        markerOptions.snippet(EmailToId);
         markerOptions.draggable(true);
 
         currentMarker = mGoogleMap.addMarker(markerOptions);
