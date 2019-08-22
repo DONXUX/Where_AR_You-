@@ -1,7 +1,6 @@
 package com.example.wherearyou;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -30,12 +29,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -51,13 +47,13 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -136,9 +132,6 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
     private MapView mapView = null;
     private GoogleMap mGoogleMap = null;
     private Marker currentMarker = null;
-    private FirebaseAuth mAuth;
-    private FirebaseUser currentUser;
-    private String EmailToId;
 
     private static final String TAG = "googlemap_example";
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
@@ -164,14 +157,6 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
         mapView = (MapView)mLayout.findViewById(R.id.map);
         mapView.getMapAsync(this);
 
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
-
-        Pattern p = Pattern.compile("([a-zA-Z0-9]*)@(.*)");
-        Matcher m = p.matcher(currentUser.getEmail());
-        if(m.find()){
-            EmailToId = m.group(1);
-        }
         Log.d(TAG, "onCreate");
 
         locationRequest = new LocationRequest().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(UPDATE_INTERVAL_MS).setFastestInterval(FASTEST_UPDATE_INTERVAL_MS);
@@ -218,7 +203,7 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
                 currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
 
                 String markerTitle = getCurrentAddress(currentPosition);
-                String markerSnippet = "위도: " + String.valueOf(location.getLatitude()) + "경도: " + String.valueOf(location.getLongitude());
+                String markerSnippet = "위도: " + location.getLatitude() + "경도: " + location.getLongitude();
 
                 Log.d(TAG, "onLocationResult: " + markerSnippet);
 
@@ -344,21 +329,16 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
     public void setCurrentLocation(Location location, String markerTitle){
         if(currentMarker != null)currentMarker.remove();
 
-
-        /////////////////////////////////////////////////DB에 위치 전달///////////////////////////////////
-        DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference userRef = mRootRef.child("User");
-        DatabaseReference locationRef = userRef.child(EmailToId);
-
-        locationRef.setValue(location.getLatitude() + ", " + location.getLongitude() + ", " + markerTitle);
-        //////////////////////////////////////////////////////////////////////////////////////////////////
-
+        ///////////////////////////////////DB에 정보 전송/////////////////////
+        ToDB toDB = new ToDB();
+        toDB.transferToDB(location, markerTitle);
+        //////////////////////////////////////////////////////////////////////
 
         LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(currentLatLng);
         markerOptions.title(markerTitle);
-        markerOptions.snippet(EmailToId);
+        markerOptions.snippet(toDB.EmailToId);
         markerOptions.draggable(true);
 
         currentMarker = mGoogleMap.addMarker(markerOptions);
@@ -509,6 +489,14 @@ class FragFriends extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.layout_friends, container, false);
 
+        ImageButton addFriend = (ImageButton) view.findViewById(R.id.friend_add);
+        addFriend.setOnClickListener(new Button.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                Intent intent = new Intent(getContext(), PopupFindFriend.class);
+                startActivityForResult(intent, 1);
+            }
+        });
         return view;
     }
 }
