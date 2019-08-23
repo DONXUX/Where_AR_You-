@@ -132,6 +132,7 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
     private MapView mapView = null;
     private GoogleMap mGoogleMap = null;
     private Marker currentMarker = null;
+    private Marker friendMarker = null;
 
     private static final String TAG = "googlemap_example";
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
@@ -208,6 +209,7 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
                 Log.d(TAG, "onLocationResult: " + markerSnippet);
 
                 setCurrentLocation(location, markerTitle);
+                getFriendLocation();
 
                 mCurrentLocation = location;
             }
@@ -345,6 +347,27 @@ class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.On
 
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(currentLatLng);
         mGoogleMap.moveCamera(cameraUpdate);
+    }
+
+    public void getFriendLocation(){
+        if(friendMarker != null)friendMarker.remove();
+
+        ///////////////////////////////DB에서 정보 가져옴///////////////////////
+        FromDB fromDB = new FromDB();
+        fromDB.friendLocation();
+        ////////////////////////////////////////////////////////////////////////
+
+        if(fromDB.friendLatitude != null && fromDB.friendLongitude != null){
+            LatLng currentLatLng = new LatLng(fromDB.friendLatitude, fromDB.friendLongitude);
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(currentLatLng);
+            markerOptions.title(fromDB.friendAddress);
+            markerOptions.snippet(fromDB.friendName);
+            markerOptions.draggable(true);
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+
+            friendMarker = mGoogleMap.addMarker(markerOptions);
+        }
     }
 
     public void setDefaultLocation(){
