@@ -15,7 +15,6 @@ import static androidx.constraintlayout.widget.Constraints.TAG;
 
 
 public class FromDB {
-    private FirebaseAuth mAuth;
     public static String friendName;
     public static Double friendLatitude;
     public static Double friendLongitude;
@@ -30,7 +29,6 @@ public class FromDB {
         DatabaseReference latitudeRef = nameRef.child("위도");
         DatabaseReference longitudeRef = nameRef.child("경도");
         DatabaseReference addressRef = nameRef.child("주소");
-        DatabaseReference timeRef = nameRef.child("시간");
 
 
         idRef.addValueEventListener(new ValueEventListener() {
