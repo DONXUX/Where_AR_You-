@@ -15,7 +15,7 @@
 
         <SearchView
             android:id="@+id/friend_search"
-            android:layout_width="319dp"
+            android:layout_width="266dp"
             android:layout_height="match_parent">
 
         </SearchView>
@@ -29,6 +29,15 @@
             android:scaleType="centerInside"
             app:srcCompat="@drawable/ic_person_add_24dp" />
 
+        <ImageButton
+            android:id="@+id/friends_sub_list_btn"
+            android:layout_width="77dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_person_24dp" />
+
     </LinearLayout>
 
     <ScrollView
@@ -39,14 +48,7 @@
             android:id="@+id/friends_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <include
-                layout="@layout/layout_friends_info"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
+            android:orientation="vertical"/>
     </ScrollView>
 
 </LinearLayout>

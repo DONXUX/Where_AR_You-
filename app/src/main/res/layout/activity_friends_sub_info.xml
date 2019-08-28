@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/friend_card"
+    android:id="@+id/friend_sub_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
 
+    android:orientation="vertical"
     app:cardBackgroundColor="#FFFFFF">
 
     <LinearLayout
-        android:id="@+id/ui_friend_info"
+        android:id="@+id/ui_friend_sub_info"
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:layout_marginLeft="16dp"
@@ -17,8 +17,8 @@
         android:gravity="left"
         android:orientation="horizontal">
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/friend_photo"
+        <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/friend_sub_photo"
             android:layout_width="64dp"
             android:layout_height="match_parent"
             android:paddingTop="8dp"
@@ -28,7 +28,7 @@
             app:civ_border_width="0dp" />
 
         <TextView
-            android:id="@+id/friend_name"
+            android:id="@+id/friend_sub_name"
             android:layout_width="169dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -37,12 +37,22 @@
             android:textSize="18dp" />
 
         <Button
-            android:id="@+id/search_btn"
+            android:id="@+id/sub_apply_btn"
             android:layout_width="3dp"
-            android:layout_height="35dp"
+            android:layout_height="30dp"
             android:layout_weight="1"
             android:background="@drawable/rounded_button"
-            android:text="찾기"
+            android:text="수락"
+            android:textSize="12dp" />
+
+        <Button
+            android:id="@+id/sub_refuse_btn"
+            android:layout_width="3dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/rounded_button_refuse"
+            android:text="거절"
             android:textSize="12dp" />
 
     </LinearLayout>

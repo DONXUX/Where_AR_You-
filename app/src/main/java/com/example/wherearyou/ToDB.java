@@ -6,13 +6,13 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.net.URL;
 import java.sql.Date;
 import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
@@ -24,6 +24,8 @@ public class ToDB{
     private String currentUser;
     private FirebaseUser user;
     public static String EmailToId;
+    public String userName;
+    public Uri photoUri;
 
     //////////////////////현재시간//////////////////////
     long now = System.currentTimeMillis();
@@ -46,8 +48,8 @@ public class ToDB{
             EmailToId = m.group(1);
         }
 
-        String userName = user.getDisplayName();
-        Uri photoUri = user.getPhotoUrl();
+        userName = user.getDisplayName();
+        photoUri = user.getPhotoUrl();
 
         DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
         DatabaseReference userRef = mRootRef.child("User");

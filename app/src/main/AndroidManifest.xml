@@ -17,6 +17,9 @@
         android:theme="@style/AppTheme">
         <activity android:name=".PopupFindFriend" android:theme="@android:style/Theme.Holo.Dialog.NoActionBar"></activity>
         <activity
+            android:name=".FriendsSub"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".CameraMap"
             android:screenOrientation="portrait" />
         <activity
