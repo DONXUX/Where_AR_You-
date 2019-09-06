@@ -60,12 +60,14 @@ public class ToDB{
         DatabaseReference longitudeRef = nameRef.child("경도");
         DatabaseReference addressRef = nameRef.child("주소");
         DatabaseReference timeRef = nameRef.child("시간");
+        DatabaseReference idRef = nameRef.child("아이디");
 
-        userNameRef.setValue(userName);
+        userNameRef.setValue(EmailToId);
         photoRef.setValue(photoUri.toString());
         latitudeRef.setValue(location.getLatitude());
         longitudeRef.setValue(location.getLongitude());
         addressRef.setValue(markerTitle);
         timeRef.setValue(getTime);
+        idRef.setValue(EmailToId);
     }
 }

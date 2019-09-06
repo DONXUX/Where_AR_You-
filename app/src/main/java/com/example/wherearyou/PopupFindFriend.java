@@ -54,7 +54,7 @@ public class PopupFindFriend extends Activity {
                             if(snapshot.getKey().equals(friendId)) {
                                 existAccount = true;
 
-                                // 자신의 아이디인지 검사
+                                // 자신의 아이디인지 검사87
                                 equalId = false;
                                 if(db.EmailToId.equals(friendId)){
                                     Toast.makeText(getApplicationContext(), "자신의 계정은 추가 할 수 없습니다.", Toast.LENGTH_LONG).show();

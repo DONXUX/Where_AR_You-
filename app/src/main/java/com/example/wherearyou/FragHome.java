@@ -61,6 +61,7 @@ public class FragHome extends Fragment implements OnMapReadyCallback, ActivityCo
     private static final int FASTEST_UPDATE_INTERVAL_MS = 500;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
     boolean needRequest = false;
+    boolean firstMap = true;
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
     Location mCurrentLocation;
     LatLng currentPosition;
@@ -211,11 +212,36 @@ public class FragHome extends Fragment implements OnMapReadyCallback, ActivityCo
     @Override
     public void onStop() {
         super.onStop();
-
+        firstMap = true;
         if(mFusedLocationClient != null){
             Log.d(TAG, "onStop : call stopLocationUpdates");
             mFusedLocationClient.removeLocationUpdates(locationCallback);
         }
+    }
+
+    public void setCurrentLocation(Location location, String markerTitle){
+        if(currentMarker != null)currentMarker.remove();
+
+        ///////////////////////////////////DB에 정보 전송/////////////////////
+        ToDB toDB = new ToDB();
+        toDB.transferToDB(location, markerTitle);
+        //////////////////////////////////////////////////////////////////////
+
+        LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(currentLatLng);
+        markerOptions.title(markerTitle);
+        markerOptions.snippet(toDB.EmailToId);
+        markerOptions.draggable(true);
+
+        currentMarker = mGoogleMap.addMarker(markerOptions);
+
+        if(firstMap == true){
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(currentLatLng);
+            mGoogleMap.moveCamera(cameraUpdate);
+            firstMap = false;
+        }
+
     }
 
     public String getCurrentAddress(LatLng latLng){
@@ -246,27 +272,6 @@ public class FragHome extends Fragment implements OnMapReadyCallback, ActivityCo
         LocationManager locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
 
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-    }
-
-    public void setCurrentLocation(Location location, String markerTitle){
-        if(currentMarker != null)currentMarker.remove();
-
-        ///////////////////////////////////DB에 정보 전송/////////////////////
-        ToDB toDB = new ToDB();
-        toDB.transferToDB(location, markerTitle);
-        //////////////////////////////////////////////////////////////////////
-
-        LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(currentLatLng);
-        markerOptions.title(markerTitle);
-        markerOptions.snippet(toDB.EmailToId);
-        markerOptions.draggable(true);
-
-        currentMarker = mGoogleMap.addMarker(markerOptions);
-
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(currentLatLng);
-        mGoogleMap.moveCamera(cameraUpdate);
     }
 
     public void getFriendLocation(){

@@ -48,7 +48,6 @@ public class FromDB {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 friendLatitude = dataSnapshot.getValue(Double.class);
-                Log.i(TAG, "뭐가 오률까33333333  " + friendLatitude);
             }
 
             @Override
