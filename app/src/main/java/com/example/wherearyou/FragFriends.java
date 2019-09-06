@@ -102,7 +102,7 @@ public class FragFriends extends Fragment {
                                     friendLocationApply.setOnClickListener(new Button.OnClickListener(){
                                         @Override
                                         public void onClick(View v){
-
+                                            // 수락시 상대방에게 동의했다고 알림
                                         }
                                     });
                                 }
