@@ -92,26 +92,26 @@ public class FragFriends extends Fragment {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 locationPermissionId = dataSnapshot.getValue(String.class);
+
+                                if(locationPermissionId != null){
+                                    friendSearchBtn.setVisibility(GONE);
+                                    friendSearchingBtn.setVisibility(GONE);
+                                    friendLocationApply.setVisibility(VISIBLE);
+                                    friendLocationReject.setVisibility(VISIBLE);
+
+                                    friendLocationApply.setOnClickListener(new Button.OnClickListener(){
+                                        @Override
+                                        public void onClick(View v){
+
+                                        }
+                                    });
+                                }
                             }
                             @Override
                             public void onCancelled(@NonNull DatabaseError databaseError) {
                             }
                         });
-
-                        //제일 처음 null값 나오는거 고쳐야댐
-                        if(locationPermissionId != null){
-                            friendSearchBtn.setVisibility(GONE);
-                            friendSearchingBtn.setVisibility(GONE);
-                            friendLocationApply.setVisibility(VISIBLE);
-                            friendLocationReject.setVisibility(VISIBLE);
-
-                            friendLocationApply.setOnClickListener(new Button.OnClickListener(){
-                                @Override
-                                public void onClick(View v){
-
-                                }
-                            });
-                        }
+                        //본인의 위치정보허용에 요청이 있으면 수락 거절 버튼 생성
 
                         // 친구 찾기 버튼
                         friendSearchBtn.setOnClickListener(new Button.OnClickListener(){
@@ -135,7 +135,7 @@ public class FragFriends extends Fragment {
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                // 내 위치 정보 허용 디비에 친구 이름이 있을 시 그 친구 버튼이 수락/거절로 변경
+
             }
 
             @Override
