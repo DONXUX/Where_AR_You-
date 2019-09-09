@@ -60,7 +60,7 @@
                 android:background="@drawable/rounded_button"
                 android:text="찾기"
                 android:textSize="12dp"
-                android:visibility="visible" />
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/sub_reject_btn"
@@ -85,6 +85,17 @@
                 android:text="수락"
                 android:textSize="10dp"
                 android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/sharing_btn"
+                android:layout_width="48dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="@drawable/rounded_button"
+                android:text="공유중..."
+                android:textSize="12dp"
+                android:visibility="gone" />
 
         </FrameLayout>
 

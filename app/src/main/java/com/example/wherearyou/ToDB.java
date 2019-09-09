@@ -62,7 +62,7 @@ public class ToDB{
         DatabaseReference timeRef = nameRef.child("시간");
         DatabaseReference idRef = nameRef.child("아이디");
 
-        userNameRef.setValue(EmailToId);
+        userNameRef.setValue(user.getDisplayName());
         photoRef.setValue(photoUri.toString());
         latitudeRef.setValue(location.getLatitude());
         longitudeRef.setValue(location.getLongitude());

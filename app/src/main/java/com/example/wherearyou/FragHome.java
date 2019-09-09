@@ -50,6 +50,7 @@ import java.util.Locale;
 import static android.content.Context.LOCATION_SERVICE;
 
 public class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
+    public boolean locationPermissionBoolean = false;
     private MapView mapView = null;
     private GoogleMap mGoogleMap = null;
     private Marker currentMarker = null;

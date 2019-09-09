@@ -51,6 +51,8 @@ public class FragFriends extends Fragment {
     Button friendSearchingBtn;
     Button friendLocationApply;
     Button friendLocationReject;
+    Button locationSharing;
+    FragHome fragHome;
     Bitmap bitmap;
     String friend_id;
     String locationPermissionId;
@@ -86,8 +88,9 @@ public class FragFriends extends Fragment {
                         friendSearchBtn.setId(friend_search_btn_id++);
 
                         friend_id = dataSnapshot.child("아이디").getValue().toString();
-                        final DatabaseReference locationPermission = mReference.child("User").child(friend_id).child("위치정보허용").child("아이디");
-                        final DatabaseReference locationPermissionMe = mReference.child("User").child(userId).child("위치정보허용").child("아이디");
+                        final DatabaseReference locationPermission = mReference.child("User").child(friend_id).child("위치정보요청").child("아이디");
+                        final DatabaseReference sharing = mReference.child("User").child(friend_id).child("위치정보허용").child("상태");
+                        final DatabaseReference locationPermissionMe = mReference.child("User").child(userId).child("위치정보요청").child("아이디");
                         locationPermissionMe.addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -103,6 +106,11 @@ public class FragFriends extends Fragment {
                                         @Override
                                         public void onClick(View v){
                                             // 수락시 상대방에게 동의했다고 알림
+                                            fragHome.locationPermissionBoolean = true;
+                                            sharing.setValue("true");
+                                            friendLocationApply.setVisibility(GONE);
+                                            friendLocationReject.setVisibility(GONE);
+                                            locationSharing.setVisibility(VISIBLE);
                                         }
                                     });
                                 }
