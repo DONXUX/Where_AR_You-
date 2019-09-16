@@ -42,6 +42,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.List;
@@ -50,7 +53,7 @@ import java.util.Locale;
 import static android.content.Context.LOCATION_SERVICE;
 
 public class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
-    public boolean locationPermissionBoolean = false;
+    public boolean locationPermissionBoolean;
     private MapView mapView = null;
     private GoogleMap mGoogleMap = null;
     private Marker currentMarker = null;
@@ -232,7 +235,7 @@ public class FragHome extends Fragment implements OnMapReadyCallback, ActivityCo
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(currentLatLng);
         markerOptions.title(markerTitle);
-        markerOptions.snippet(toDB.EmailToId);
+        markerOptions.snippet(toDB.userName);
         markerOptions.draggable(true);
 
         currentMarker = mGoogleMap.addMarker(markerOptions);
@@ -269,6 +272,7 @@ public class FragHome extends Fragment implements OnMapReadyCallback, ActivityCo
         }
     }
 
+
     public boolean checkLocationServicesStatus(){
         LocationManager locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
 
@@ -283,16 +287,18 @@ public class FragHome extends Fragment implements OnMapReadyCallback, ActivityCo
         fromDB.friendLocation();
         ////////////////////////////////////////////////////////////////////////
 
-        if(fromDB.friendLatitude != null && fromDB.friendLongitude != null){
-            LatLng currentLatLng = new LatLng(fromDB.friendLatitude, fromDB.friendLongitude);
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(currentLatLng);
-            markerOptions.title(fromDB.friendAddress);
-            markerOptions.snippet(fromDB.friendName);
-            markerOptions.draggable(true);
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+        if(fromDB.permissionStatus ==true){
+            if(fromDB.friendLatitude != null && fromDB.friendLongitude != null){
+                LatLng currentLatLng = new LatLng(fromDB.friendLatitude, fromDB.friendLongitude);
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(currentLatLng);
+                markerOptions.title(fromDB.friendAddress);
+                markerOptions.snippet(fromDB.friendName);
+                markerOptions.draggable(true);
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
-            friendMarker = mGoogleMap.addMarker(markerOptions);
+                friendMarker = mGoogleMap.addMarker(markerOptions);
+            }
         }
     }
 

@@ -11,8 +11,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import static androidx.constraintlayout.widget.Constraints.TAG;
-
 
 public class FromDB {
     private FirebaseAuth mAuth;
@@ -20,23 +18,17 @@ public class FromDB {
     public static Double friendLatitude;
     public static Double friendLongitude;
     public static String friendAddress;
-
+    public static Boolean permissionStatus = false;
+    FragFriends fragFriends = new FragFriends();
 
     public void friendLocation(){
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference mRootRef = database.getInstance().getReference("User");
-        DatabaseReference nameRef = mRootRef.child("ldu2175");
-        DatabaseReference idRef = nameRef.child("이름");
-        DatabaseReference latitudeRef = nameRef.child("위도");
-        DatabaseReference longitudeRef = nameRef.child("경도");
-        DatabaseReference addressRef = nameRef.child("주소");
-        DatabaseReference timeRef = nameRef.child("시간");
 
-
-        idRef.addValueEventListener(new ValueEventListener() {
+        ToDB toDB = new ToDB();
+        final DatabaseReference sharing = FirebaseDatabase.getInstance().getReference().child("User").child(toDB.EmailToId).child("위치정보허용").child("상태");
+        sharing.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                friendName = dataSnapshot.getValue(String.class);
+                permissionStatus = dataSnapshot.getValue(Boolean.class);
             }
 
             @Override
@@ -44,37 +36,60 @@ public class FromDB {
             }
         });
 
-        latitudeRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                friendLatitude = dataSnapshot.getValue(Double.class);
-            }
+        if(permissionStatus == true){
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            DatabaseReference mRootRef = database.getInstance().getReference("User");
+            DatabaseReference nameRef = mRootRef.child("ldu2175");
+            DatabaseReference idRef = nameRef.child("이름");
+            DatabaseReference latitudeRef = nameRef.child("위도");
+            DatabaseReference longitudeRef = nameRef.child("경도");
+            DatabaseReference addressRef = nameRef.child("주소");
+            DatabaseReference timeRef = nameRef.child("시간");
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        });
 
-        longitudeRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                friendLongitude = dataSnapshot.getValue(Double.class);
-            }
+            idRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    friendName = dataSnapshot.getValue(String.class);
+                }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        });
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
+            });
 
-        addressRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                friendAddress = dataSnapshot.getValue(String.class);
-            }
+            latitudeRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    friendLatitude = dataSnapshot.getValue(Double.class);
+                }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        });
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
+            });
+
+            longitudeRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    friendLongitude = dataSnapshot.getValue(Double.class);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
+            });
+
+            addressRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    friendAddress = dataSnapshot.getValue(String.class);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
+            });
+        }
     }
 }

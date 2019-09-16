@@ -52,7 +52,7 @@ public class FragFriends extends Fragment {
     Button friendLocationApply;
     Button friendLocationReject;
     Button locationSharing;
-    FragHome fragHome;
+    FragHome fragHome = new FragHome();
     Bitmap bitmap;
     String friend_id;
     String locationPermissionId;
@@ -67,11 +67,6 @@ public class FragFriends extends Fragment {
         mReference = FirebaseDatabase.getInstance().getReference();
         userId = db.EmailToId;
         mRootLinear = (LinearLayout) view.findViewById(R.id.friends_list);
-        final View mView = inflater.inflate(R.layout.layout_friends_info, mRootLinear, true);
-        friendSearchBtn = (Button)mView.findViewById(R.id.search_btn);
-        friendSearchingBtn = (Button)mView.findViewById(R.id.searching_btn);
-        friendLocationApply = (Button)mView.findViewById(R.id.sub_apply_btn);
-        friendLocationReject = (Button)mView.findViewById(R.id.sub_reject_btn);
 
         // 친구 목록 수신 리스너
         mReference.child("User").child(userId).child("친구").addChildEventListener(new ChildEventListener() {
@@ -81,6 +76,12 @@ public class FragFriends extends Fragment {
                 mReference.child("User").child(dataSnapshot.getValue().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+                        final View mView = inflater.inflate(R.layout.layout_friends_info, mRootLinear, true);
+                        friendSearchBtn = (Button)mView.findViewById(R.id.search_btn);
+                        friendSearchingBtn = (Button)mView.findViewById(R.id.searching_btn);
+                        friendLocationApply = (Button)mView.findViewById(R.id.sub_apply_btn);
+                        friendLocationReject = (Button)mView.findViewById(R.id.sub_reject_btn);
+                        locationSharing = (Button)mView.findViewById(R.id.sharing_btn);
                         permissionInfo(mView, dataSnapshot);
 
                         // 버튼 불러오기
@@ -96,12 +97,12 @@ public class FragFriends extends Fragment {
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 locationPermissionId = dataSnapshot.getValue(String.class);
 
-                                if(locationPermissionId != null){
+                                if(friend_id.equals(locationPermissionId)){
                                     friendSearchBtn.setVisibility(GONE);
                                     friendSearchingBtn.setVisibility(GONE);
                                     friendLocationApply.setVisibility(VISIBLE);
                                     friendLocationReject.setVisibility(VISIBLE);
-
+                                    //연결끊기 버튼 만들고 액션 생성
                                     friendLocationApply.setOnClickListener(new Button.OnClickListener(){
                                         @Override
                                         public void onClick(View v){
@@ -111,6 +112,15 @@ public class FragFriends extends Fragment {
                                             friendLocationApply.setVisibility(GONE);
                                             friendLocationReject.setVisibility(GONE);
                                             locationSharing.setVisibility(VISIBLE);
+
+                                            locationPermissionMe.removeValue();
+                                        }
+                                    });
+
+                                    friendLocationReject.setOnClickListener(new Button.OnClickListener(){
+                                        @Override
+                                        public void onClick(View v){
+
                                         }
                                     });
                                 }
@@ -188,12 +198,16 @@ public class FragFriends extends Fragment {
 
     void permissionInfo(View mView, DataSnapshot dataSnapshot) {
         friendPhoto = (CircleImageView) mView.findViewById(R.id.friend_photo);
+        Log.d("TAG", "에러원인1: " + friendPhoto);
+        Log.d("TAG", "에러원인2: " + friend_id_num);
         // 각 프로필 정보의 사진마다 다른 id를 지정 (기본적으로 20000~29999 짝수 id에 해당)
         friendPhoto.setId(friend_id_num++);
+        Log.d("TAG", "에러원인3: " + friend_id_num);
         friendName = (TextView) mView.findViewById(R.id.friend_name);
+        Log.d("TAG", "프렌드네임: " + friend_id_num);
         // 각 프로필 정보의 이름마다 다른 id를 지정 (기본적으로 20000~29999 홀수 id에 해당)
         friendName.setId(friend_id_num++);
-
+        Log.d("TAG", "에러원인4: " + friend_id_num);
         // URL로 부터 프로필 사진 불러오는 쓰레드
         final String photoUrl = dataSnapshot.child("사진").getValue().toString();
         Thread mThread = new Thread() {
