@@ -73,7 +73,8 @@ public class FragFriends extends Fragment {
             @Override
             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
                 for(DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
-                    buttonEvent(inflater);
+                    Log.d(TAG, "에러:  " + dataSnapshot1);
+                    buttonEvent(inflater, dataSnapshot1);
                 }
             }
             @Override
@@ -105,7 +106,7 @@ public class FragFriends extends Fragment {
         return view;
     }
 
-    private void buttonEvent(final LayoutInflater inflater){
+    private void buttonEvent(final LayoutInflater inflater, final DataSnapshot dataSnapshot1){
         mReference = FirebaseDatabase.getInstance().getReference();
         userId = ToDB.EmailToId;
         mRootLinear = (LinearLayout) view.findViewById(R.id.friends_list);
@@ -119,7 +120,8 @@ public class FragFriends extends Fragment {
                 friendLocationApply = (Button)mView.findViewById(R.id.sub_apply_btn);
                 friendLocationReject = (Button)mView.findViewById(R.id.sub_reject_btn);
                 locationSharing = (Button)mView.findViewById(R.id.sharing_btn);
-                permissionInfo(mView, dataSnapshot);
+                String friendRef = dataSnapshot1.getValue(String.class);
+                permissionInfo(mView, friendRef);
 
                 // 버튼 불러오기
                 // 각 프로필 정보의 찾기 버튼마다 다른 id를 지정 (기본적으로 30000부터 1씩 올림)
@@ -190,7 +192,7 @@ public class FragFriends extends Fragment {
                 });
             }
 
-    private void permissionInfo(View mView, DataSnapshot dataSnapshot) {
+    private void permissionInfo(View mView, String friendRef) {
         friendPhoto = (CircleImageView) mView.findViewById(R.id.friend_photo);
         Log.d("TAG", "에러원인1: " + friendPhoto);
         Log.d("TAG", "에러원인2: " + friend_id_num);
@@ -203,47 +205,58 @@ public class FragFriends extends Fragment {
         friendName.setId(friend_id_num++);
         Log.d("TAG", "에러원인4: " + friend_id_num);
         // URL로 부터 프로필 사진 불러오는 쓰레드
-        if (dataSnapshot.child("사진").getValue() != null) {
-            final String photoUrl = dataSnapshot.child("사진").getValue().toString();
-            Thread mThread = new Thread() {
-                @Override
-                public void run() {
+        mReference.child("User").child(friendRef).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.child("사진").getValue() != null) {
+                    final String photoUrl = dataSnapshot.child("사진").getValue().toString();
+                    Thread mThread = new Thread() {
+                        @Override
+                        public void run() {
+                            try {
+                                URL url = null;
+                                try {
+                                    url = new URL(photoUrl);
+                                } catch (MalformedURLException e) {
+                                    e.printStackTrace();
+                                }
+                                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                                conn.setDoInput(true);
+                                conn.connect();
+                                InputStream is = null;
+                                try {
+                                    is = conn.getInputStream();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                bitmap = BitmapFactory.decodeStream(is);
+                            } catch (IOException ex) {
+
+                            }
+                        }
+                    };
+
+                    mThread.start();
                     try {
-                        URL url = null;
-                        try {
-                            url = new URL(photoUrl);
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        }
-                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                        conn.setDoInput(true);
-                        conn.connect();
-                        InputStream is = null;
-                        try {
-                            is = conn.getInputStream();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        bitmap = BitmapFactory.decodeStream(is);
-                    } catch (IOException ex) {
+                        mThread.join();
+                        friendPhoto.setImageBitmap(bitmap);
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
 
                     }
+                    ///////////////////////////
+
+                    // 이름 불러오기
+                    friendName.setText(dataSnapshot.child("이름").getValue().toString());
                 }
-            };
+            }
 
-            mThread.start();
-            try {
-                mThread.join();
-                friendPhoto.setImageBitmap(bitmap);
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-            ///////////////////////////
-
-            // 이름 불러오기
-            friendName.setText(dataSnapshot.child("이름").getValue().toString());
-        }
+        });
     }
 }
