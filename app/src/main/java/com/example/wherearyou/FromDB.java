@@ -36,7 +36,7 @@ public class FromDB {
             }
         });
 
-        if(permissionStatus == true){
+        if(permissionStatus){
             FirebaseDatabase database = FirebaseDatabase.getInstance();
             DatabaseReference mRootRef = database.getInstance().getReference("User");
             DatabaseReference nameRef = mRootRef.child("ldu2175");

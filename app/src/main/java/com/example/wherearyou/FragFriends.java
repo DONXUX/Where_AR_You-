@@ -26,12 +26,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -63,111 +65,19 @@ public class FragFriends extends Fragment {
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.layout_friends, container, false);
         mReference = FirebaseDatabase.getInstance().getReference();
         userId = db.EmailToId;
-        mRootLinear = (LinearLayout) view.findViewById(R.id.friends_list);
-        // 친구 목록 수신 리스너
-        mReference.child("User").child(userId).child("친구").addChildEventListener(new ChildEventListener() {
+        view = inflater.inflate(R.layout.layout_friends, container, false);
+
+        mReference.child("User").child(userId).child("친구").addValueEventListener(new ValueEventListener() {
             @Override
-            // 친구 목록에 데이터가 추가 될 때마다 실행되는 메소드
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                mReference.child("User").child(dataSnapshot.getValue().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
-                        final View mView = inflater.inflate(R.layout.layout_friends_info, mRootLinear, true);
-                        friendSearchBtn = (Button)mView.findViewById(R.id.search_btn);
-                        friendSearchingBtn = (Button)mView.findViewById(R.id.searching_btn);
-                        friendLocationApply = (Button)mView.findViewById(R.id.sub_apply_btn);
-                        friendLocationReject = (Button)mView.findViewById(R.id.sub_reject_btn);
-                        locationSharing = (Button)mView.findViewById(R.id.sharing_btn);
-                        permissionInfo(mView, dataSnapshot);
-
-                        // 버튼 불러오기
-                        // 각 프로필 정보의 찾기 버튼마다 다른 id를 지정 (기본적으로 30000부터 1씩 올림)
-                        friendSearchBtn.setId(friend_search_btn_id++);
-
-                        friend_id = dataSnapshot.child("아이디").getValue().toString();
-                        final DatabaseReference locationPermission = mReference.child("User").child(friend_id).child("위치정보요청").child("아이디");
-                        final DatabaseReference sharing = mReference.child("User").child(friend_id).child("위치정보허용").child("상태");
-                        final DatabaseReference locationPermissionMe = mReference.child("User").child(userId).child("위치정보요청").child("아이디");
-                        locationPermissionMe.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                locationPermissionId = dataSnapshot.getValue(String.class);
-
-                                if(friend_id.equals(locationPermissionId)){
-                                    friendSearchBtn.setVisibility(GONE);
-                                    friendSearchingBtn.setVisibility(GONE);
-                                    friendLocationApply.setVisibility(VISIBLE);
-                                    friendLocationReject.setVisibility(VISIBLE);
-                                    //연결끊기 버튼 만들고 액션 생성
-                                    friendLocationApply.setOnClickListener(new Button.OnClickListener(){
-                                        @Override
-                                        public void onClick(View v){
-                                            // 수락시 상대방에게 동의했다고 알림
-                                            fragHome.locationPermissionBoolean = true;
-                                            sharing.setValue("true");
-                                            friendLocationApply.setVisibility(GONE);
-                                            friendLocationReject.setVisibility(GONE);
-                                            locationSharing.setVisibility(VISIBLE);
-
-                                            locationPermissionMe.removeValue();
-                                        }
-                                    });
-
-                                    friendLocationReject.setOnClickListener(new Button.OnClickListener(){
-                                        @Override
-                                        public void onClick(View v){
-
-                                        }
-                                    });
-                                }
-                            }
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-                            }
-                        });
-                        //본인의 위치정보허용에 요청이 있으면 수락 거절 버튼 생성
-
-                        // 친구 찾기 버튼
-                        friendSearchBtn.setOnClickListener(new Button.OnClickListener(){
-                            @Override
-                            public void onClick(View v){
-                                //TODO : 친구 찾기 기능 (권영민)
-                                //찾기 버튼을 눌렀을 시 내 아이디가 친구 위치요청디비에 저장 및 버튼이 요청중.. 으로 변경
-                                locationPermission.setValue(userId);
-                                friendSearchBtn.setVisibility(GONE);
-                                friendSearchingBtn.setVisibility(VISIBLE);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
+            public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+                for(DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
+                    buttonEvent(inflater);
+                }
             }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
         });
 
@@ -195,7 +105,92 @@ public class FragFriends extends Fragment {
         return view;
     }
 
-    void permissionInfo(View mView, DataSnapshot dataSnapshot) {
+    private void buttonEvent(final LayoutInflater inflater){
+        mReference = FirebaseDatabase.getInstance().getReference();
+        userId = ToDB.EmailToId;
+        mRootLinear = (LinearLayout) view.findViewById(R.id.friends_list);
+        // 친구 목록 수신 리스너
+        mReference.child("User").child(userId).child("친구").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+                final View mView = inflater.inflate(R.layout.layout_friends_info, mRootLinear, true);
+                friendSearchBtn = (Button)mView.findViewById(R.id.search_btn);
+                friendSearchingBtn = (Button)mView.findViewById(R.id.searching_btn);
+                friendLocationApply = (Button)mView.findViewById(R.id.sub_apply_btn);
+                friendLocationReject = (Button)mView.findViewById(R.id.sub_reject_btn);
+                locationSharing = (Button)mView.findViewById(R.id.sharing_btn);
+                permissionInfo(mView, dataSnapshot);
+
+                // 버튼 불러오기
+                // 각 프로필 정보의 찾기 버튼마다 다른 id를 지정 (기본적으로 30000부터 1씩 올림)
+                friendSearchBtn.setId(friend_search_btn_id++);
+
+                if(dataSnapshot.child("아이디").getValue() != null){
+                    friend_id = dataSnapshot.child("아이디").getValue().toString();
+                    final DatabaseReference locationPermission = mReference.child("User").child(friend_id).child("위치정보요청").child("아이디");
+                    final DatabaseReference sharing = mReference.child("User").child(friend_id).child("위치정보허용").child("상태");
+                    final DatabaseReference locationPermissionMe = mReference.child("User").child(userId).child("위치정보요청").child("아이디");
+                    locationPermissionMe.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            locationPermissionId = dataSnapshot.getValue(String.class);
+
+                            if(friend_id.equals(locationPermissionId)){
+                                friendSearchBtn.setVisibility(GONE);
+                                friendSearchingBtn.setVisibility(GONE);
+                                friendLocationApply.setVisibility(VISIBLE);
+                                friendLocationReject.setVisibility(VISIBLE);
+                                //연결끊기 버튼 만들고 액션 생성
+                                friendLocationApply.setOnClickListener(new Button.OnClickListener(){
+                                    @Override
+                                    public void onClick(View v){
+                                        // 수락시 상대방에게 동의했다고 알림
+                                        fragHome.locationPermissionBoolean = true;
+                                        sharing.setValue("true");
+                                        friendLocationApply.setVisibility(GONE);
+                                        friendLocationReject.setVisibility(GONE);
+                                        locationSharing.setVisibility(VISIBLE);
+
+                                        locationPermissionMe.removeValue();
+                                    }
+                                });
+
+                                friendLocationReject.setOnClickListener(new Button.OnClickListener(){
+                                    @Override
+                                    public void onClick(View v){
+
+                                    }
+                                });
+                            }
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                        }
+                    });
+                    //본인의 위치정보허용에 요청이 있으면 수락 거절 버튼 생성
+
+                    // 친구 찾기 버튼
+                    friendSearchBtn.setOnClickListener(new Button.OnClickListener(){
+                        @Override
+                        public void onClick(View v){
+                            //TODO : 친구 찾기 기능 (권영민)
+                            //찾기 버튼을 눌렀을 시 내 아이디가 친구 위치요청디비에 저장 및 버튼이 요청중.. 으로 변경
+                            locationPermission.setValue(userId);
+                            friendSearchBtn.setVisibility(GONE);
+                            friendSearchingBtn.setVisibility(VISIBLE);
+                        }
+                    });
+                }
+                }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+    private void permissionInfo(View mView, DataSnapshot dataSnapshot) {
         friendPhoto = (CircleImageView) mView.findViewById(R.id.friend_photo);
         Log.d("TAG", "에러원인1: " + friendPhoto);
         Log.d("TAG", "에러원인2: " + friend_id_num);
@@ -208,45 +203,47 @@ public class FragFriends extends Fragment {
         friendName.setId(friend_id_num++);
         Log.d("TAG", "에러원인4: " + friend_id_num);
         // URL로 부터 프로필 사진 불러오는 쓰레드
-        final String photoUrl = dataSnapshot.child("사진").getValue().toString();
-        Thread mThread = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    URL url = null;
+        if (dataSnapshot.child("사진").getValue() != null) {
+            final String photoUrl = dataSnapshot.child("사진").getValue().toString();
+            Thread mThread = new Thread() {
+                @Override
+                public void run() {
                     try {
-                        url = new URL(photoUrl);
-                    } catch (MalformedURLException e) {
-                        e.printStackTrace();
-                    }
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setDoInput(true);
-                    conn.connect();
-                    InputStream is = null;
-                    try {
-                        is = conn.getInputStream();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    bitmap = BitmapFactory.decodeStream(is);
-                } catch (IOException ex) {
+                        URL url = null;
+                        try {
+                            url = new URL(photoUrl);
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                        conn.setDoInput(true);
+                        conn.connect();
+                        InputStream is = null;
+                        try {
+                            is = conn.getInputStream();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        bitmap = BitmapFactory.decodeStream(is);
+                    } catch (IOException ex) {
 
+                    }
                 }
+            };
+
+            mThread.start();
+            try {
+                mThread.join();
+                friendPhoto.setImageBitmap(bitmap);
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+
             }
-        };
+            ///////////////////////////
 
-        mThread.start();
-        try {
-            mThread.join();
-            friendPhoto.setImageBitmap(bitmap);
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-
+            // 이름 불러오기
+            friendName.setText(dataSnapshot.child("이름").getValue().toString());
         }
-        ///////////////////////////
-
-        // 이름 불러오기
-        friendName.setText(dataSnapshot.child("이름").getValue().toString());
     }
 }

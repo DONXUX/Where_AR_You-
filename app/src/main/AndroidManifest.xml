@@ -9,7 +9,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FriendWindow"></activity>
         <activity
             android:name=".PopupFindFriend"
             android:theme="@android:style/Theme.Holo.Dialog.NoActionBar" />

@@ -61,6 +61,7 @@ public class ToDB{
         DatabaseReference addressRef = nameRef.child("주소");
         DatabaseReference timeRef = nameRef.child("시간");
         DatabaseReference idRef = nameRef.child("아이디");
+        DatabaseReference statusRef = nameRef.child("위치정보허용").child("상태");
 
         userNameRef.setValue(user.getDisplayName());
         photoRef.setValue(photoUri.toString());
@@ -69,5 +70,6 @@ public class ToDB{
         addressRef.setValue(markerTitle);
         timeRef.setValue(getTime);
         idRef.setValue(EmailToId);
+        statusRef.setValue(false);
     }
 }
