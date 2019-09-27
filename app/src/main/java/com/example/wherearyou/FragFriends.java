@@ -1,23 +1,31 @@
 package com.example.wherearyou;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.nfc.Tag;
 import android.os.Bundle;
+import android.os.Handler;
 import android.renderscript.Sampler;
+import android.text.BoringLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -33,6 +41,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -43,6 +52,7 @@ import static androidx.constraintlayout.widget.Constraints.TAG;
 
 public class FragFriends extends Fragment {
     View view;
+    View mView;
     DatabaseReference mReference;
     ToDB db;
     String userId;
@@ -58,29 +68,40 @@ public class FragFriends extends Fragment {
     Bitmap bitmap;
     String friend_id;
     String locationPermissionId;
+    Boolean exception = false;
+    static final String[] friend = {"List1", "List2"};
+    int i = 0;
     int friend_id_num = 20000;          // 프로필 사진과 이름의 ID 시작 값
     int friend_search_btn_id = 30000;   // 프로필의 찾기 버튼 ID 시작 값
-
+    int cnt = 0;
 
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         mReference = FirebaseDatabase.getInstance().getReference();
         userId = db.EmailToId;
-        view = inflater.inflate(R.layout.layout_friends, container, false);
+        view = inflater.inflate(R.layout.layout_friends, null);
 
         mReference.child("User").child(userId).child("친구").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+                i=0;
                 for(DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
-                    Log.d(TAG, "에러:  " + dataSnapshot1);
-                    buttonEvent(inflater, dataSnapshot1);
+                    friend[i] = dataSnapshot1.getValue(String.class);
+                    Log.d(TAG, "에러원인123 " + friend[i]);
+                    i++;
                 }
+                ArrayAdapter adapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, friend);
+
+                ListView listView = (ListView) view.findViewById(R.id.friends_list);
+                listView.setAdapter(adapter);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
             }
         });
+
+
 
         // 친구 추가 팝업
         ImageButton addFriend = (ImageButton) view.findViewById(R.id.friend_add);
@@ -103,18 +124,18 @@ public class FragFriends extends Fragment {
             }
         });
         ////////////////////
+
         return view;
     }
-
-    private void buttonEvent(final LayoutInflater inflater, final DataSnapshot dataSnapshot1){
+    /*private void buttonEvent(final LayoutInflater inflater, final DataSnapshot dataSnapshot1){
         mReference = FirebaseDatabase.getInstance().getReference();
         userId = ToDB.EmailToId;
-        mRootLinear = (LinearLayout) view.findViewById(R.id.friends_list);
+        mRootLinear = (ListView) view.findViewById(R.id.friends_list);
         // 친구 목록 수신 리스너
         mReference.child("User").child(userId).child("친구").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
-                final View mView = inflater.inflate(R.layout.layout_friends_info, mRootLinear, true);
+                mView = inflater.inflate(R.layout.layout_friends_info, mRootLinear, true);
                 friendSearchBtn = (Button)mView.findViewById(R.id.search_btn);
                 friendSearchingBtn = (Button)mView.findViewById(R.id.searching_btn);
                 friendLocationApply = (Button)mView.findViewById(R.id.sub_apply_btn);
@@ -190,7 +211,7 @@ public class FragFriends extends Fragment {
 
                     }
                 });
-            }
+            }*/
 
     private void permissionInfo(View mView, String friendRef) {
         friendPhoto = (CircleImageView) mView.findViewById(R.id.friend_photo);
@@ -258,5 +279,9 @@ public class FragFriends extends Fragment {
 
             }
         });
+    }
+    private void refresh(){
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.detach(this).attach(this).commit();
     }
 }
