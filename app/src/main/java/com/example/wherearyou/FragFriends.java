@@ -84,6 +84,7 @@ public class FragFriends extends Fragment {
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+
         mReference = FirebaseDatabase.getInstance().getReference();
         userId = db.EmailToId;
         view = inflater.inflate(R.layout.layout_friends, null);
@@ -91,19 +92,17 @@ public class FragFriends extends Fragment {
         mReference.child("User").child(userId).child("친구").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
-                i=0;
-                j=0;
                 ListView listView;
-                final ListViewAdapter adapter;
-
-                adapter = new ListViewAdapter();
-
+                ListViewAdapter adapter = new ListViewAdapter();
                 listView = (ListView) view.findViewById(R.id.friends_list);
                 listView.setAdapter(adapter);
+                i=0;
+                j=0;
+                cnt = 0;
+                Log.d(TAG, "로그" + dataSnapshot.getChildrenCount());
 
                 for(DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
                     friend[i] = dataSnapshot1.getValue(String.class);
-
                     mReference.child("User").child(friend[i]).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -118,9 +117,12 @@ public class FragFriends extends Fragment {
                         }
                     });
                     i++;
-                }
-                for(int a = 0; a < i ; a++){
-                    adapter.addItem(friend[a], photoUrl[a]);
+                    cnt++;
+                    if(dataSnapshot.getChildrenCount() == cnt){
+                        for(int a = 0; a < i ; a++){
+                            adapter.addItem(friend[a], photoUrl[a]);
+                        }
+                    }
                 }
             }
             @Override
