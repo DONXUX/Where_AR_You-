@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -66,11 +67,16 @@ public class FragFriends extends Fragment {
     Button locationSharing;
     FragHome fragHome = new FragHome();
     Bitmap bitmap;
+    Bitmap bitRef;
     String friend_id;
     String locationPermissionId;
     Boolean exception = false;
-    static final String[] friend = {"List1", "List2"};
+
+
+    static String[] friend = new String[100];
+    static String[] photoUrl = new String[100];
     int i = 0;
+    int j = 0;
     int friend_id_num = 20000;          // 프로필 사진과 이름의 ID 시작 값
     int friend_search_btn_id = 30000;   // 프로필의 찾기 버튼 ID 시작 값
     int cnt = 0;
@@ -86,22 +92,41 @@ public class FragFriends extends Fragment {
             @Override
             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
                 i=0;
+                j=0;
+                ListView listView;
+                final ListViewAdapter adapter;
+
+                adapter = new ListViewAdapter();
+
+                listView = (ListView) view.findViewById(R.id.friends_list);
+                listView.setAdapter(adapter);
+
                 for(DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
                     friend[i] = dataSnapshot1.getValue(String.class);
-                    Log.d(TAG, "에러원인123 " + friend[i]);
+
+                    mReference.child("User").child(friend[i]).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            photoUrl[j] = dataSnapshot.child("사진").getValue(String.class);
+                            Log.d(TAG, "포토사진1" + photoUrl[i]);
+                            j++;
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
                     i++;
                 }
-                ArrayAdapter adapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, friend);
-
-                ListView listView = (ListView) view.findViewById(R.id.friends_list);
-                listView.setAdapter(adapter);
+                for(int a = 0; a < i ; a++){
+                    adapter.addItem(friend[a], photoUrl[a]);
+                }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
             }
         });
-
-
 
         // 친구 추가 팝업
         ImageButton addFriend = (ImageButton) view.findViewById(R.id.friend_add);
@@ -212,76 +237,4 @@ public class FragFriends extends Fragment {
                     }
                 });
             }*/
-
-    private void permissionInfo(View mView, String friendRef) {
-        friendPhoto = (CircleImageView) mView.findViewById(R.id.friend_photo);
-        Log.d("TAG", "에러원인1: " + friendPhoto);
-        Log.d("TAG", "에러원인2: " + friend_id_num);
-        // 각 프로필 정보의 사진마다 다른 id를 지정 (기본적으로 20000~29999 짝수 id에 해당)
-        friendPhoto.setId(friend_id_num++);
-        Log.d("TAG", "에러원인3: " + friend_id_num);
-        friendName = (TextView) mView.findViewById(R.id.friend_name);
-        Log.d("TAG", "프렌드네임: " + friend_id_num);
-        // 각 프로필 정보의 이름마다 다른 id를 지정 (기본적으로 20000~29999 홀수 id에 해당)
-        friendName.setId(friend_id_num++);
-        Log.d("TAG", "에러원인4: " + friend_id_num);
-        // URL로 부터 프로필 사진 불러오는 쓰레드
-        mReference.child("User").child(friendRef).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                if (dataSnapshot.child("사진").getValue() != null) {
-                    final String photoUrl = dataSnapshot.child("사진").getValue().toString();
-                    Thread mThread = new Thread() {
-                        @Override
-                        public void run() {
-                            try {
-                                URL url = null;
-                                try {
-                                    url = new URL(photoUrl);
-                                } catch (MalformedURLException e) {
-                                    e.printStackTrace();
-                                }
-                                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                                conn.setDoInput(true);
-                                conn.connect();
-                                InputStream is = null;
-                                try {
-                                    is = conn.getInputStream();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                bitmap = BitmapFactory.decodeStream(is);
-                            } catch (IOException ex) {
-
-                            }
-                        }
-                    };
-
-                    mThread.start();
-                    try {
-                        mThread.join();
-                        friendPhoto.setImageBitmap(bitmap);
-
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-
-                    }
-                    ///////////////////////////
-
-                    // 이름 불러오기
-                    friendName.setText(dataSnapshot.child("이름").getValue().toString());
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-    private void refresh(){
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.detach(this).attach(this).commit();
-    }
 }
