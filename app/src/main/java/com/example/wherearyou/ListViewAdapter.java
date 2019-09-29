@@ -8,7 +8,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +29,9 @@ import java.util.ArrayList;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static android.content.ContentValues.TAG;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+import static com.example.wherearyou.MainActivity.fragHome;
 
 public class ListViewAdapter extends BaseAdapter {
     Bitmap bitmap;
@@ -44,6 +56,12 @@ public class ListViewAdapter extends BaseAdapter {
 
         final CircleImageView iconImageView = (CircleImageView) convertView.findViewById(R.id.friend_photo);
         final TextView friendNameView = (TextView) convertView.findViewById(R.id.friend_name);
+        final Button friendSearchBtn = (Button) convertView.findViewById(R.id.search_btn);
+        final Button friendSearchingBtn = (Button) convertView.findViewById(R.id.searching_btn);
+        final Button friendLocationApply = (Button) convertView.findViewById(R.id.sub_apply_btn);
+        final Button friendLocationReject = (Button) convertView.findViewById(R.id.sub_reject_btn);
+        final Button locationSharing = (Button) convertView.findViewById(R.id.sharing_btn);
+        DatabaseReference mReference = FirebaseDatabase.getInstance().getReference();
 
         final ListViewItem listViewItem = listViewItemList.get(position);
         Log.d(TAG, "순서2");
@@ -68,6 +86,7 @@ public class ListViewAdapter extends BaseAdapter {
                     iconImageView.setImageBitmap(bitmap);
                     friendNameView.setText(listViewItem.getFriendName());
 
+
                 } catch (IOException ex) {
 
                 }
@@ -84,6 +103,61 @@ public class ListViewAdapter extends BaseAdapter {
             e.printStackTrace();
         }
 
+        final DatabaseReference locationPermission = mReference.child("User").child(listViewItem.getFriendName()).child("위치정보요청").child("아이디");
+        final DatabaseReference locationPermissionMe = mReference.child("User").child(ToDB.EmailToId).child("위치정보요청").child("아이디");
+        final DatabaseReference sharing = mReference.child("User").child(listViewItem.getFriendName()).child("위치정보허용").child("상태");
+        locationPermissionMe.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String locationPermissionId = dataSnapshot.getValue(String.class);
+
+                friendSearchBtn.setOnClickListener(new Button.OnClickListener(){
+                    @Override
+                    public void onClick(View v){
+                        friendSearchBtn.setVisibility(GONE);
+                        friendSearchingBtn.setVisibility(VISIBLE);
+                        friendLocationApply.setVisibility(GONE);
+                        friendLocationReject.setVisibility(GONE);
+                        locationSharing.setVisibility(GONE);
+
+                        locationPermission.setValue(ToDB.EmailToId);
+                    }
+                });
+
+                if(listViewItem.getFriendName().equals(locationPermissionId)){
+                    friendSearchBtn.setVisibility(GONE);
+                    friendSearchingBtn.setVisibility(GONE);
+                    friendLocationApply.setVisibility(VISIBLE);
+                    friendLocationReject.setVisibility(VISIBLE);
+                    locationSharing.setVisibility(GONE);
+                    //연결끊기 버튼 만들고 액션 생성
+                    friendLocationApply.setOnClickListener(new Button.OnClickListener(){
+                        @Override
+                        public void onClick(View v){
+                            // 수락시 상대방에게 동의했다고 알림
+                            sharing.setValue(true);
+                            friendSearchBtn.setVisibility(GONE);
+                            friendSearchingBtn.setVisibility(GONE);
+                            friendLocationApply.setVisibility(GONE);
+                            friendLocationReject.setVisibility(GONE);
+                            locationSharing.setVisibility(VISIBLE);
+
+                            FragHome.locationPermissionBoolean = true;
+                        }
+                    });
+
+                    friendLocationReject.setOnClickListener(new Button.OnClickListener(){
+                        @Override
+                        public void onClick(View v){
+
+                        }
+                    });
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
 
         return convertView;
     }

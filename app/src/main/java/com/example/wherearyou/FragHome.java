@@ -53,7 +53,7 @@ import java.util.Locale;
 import static android.content.Context.LOCATION_SERVICE;
 
 public class FragHome extends Fragment implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
-    public boolean locationPermissionBoolean;
+    public static boolean locationPermissionBoolean = false;
     private MapView mapView = null;
     private GoogleMap mGoogleMap = null;
     private Marker currentMarker = null;
@@ -287,7 +287,7 @@ public class FragHome extends Fragment implements OnMapReadyCallback, ActivityCo
         fromDB.friendLocation();
         ////////////////////////////////////////////////////////////////////////
 
-        if(fromDB.permissionStatus ==true){
+        if(locationPermissionBoolean){
             if(fromDB.friendLatitude != null && fromDB.friendLongitude != null){
                 LatLng currentLatLng = new LatLng(fromDB.friendLatitude, fromDB.friendLongitude);
                 MarkerOptions markerOptions = new MarkerOptions();
