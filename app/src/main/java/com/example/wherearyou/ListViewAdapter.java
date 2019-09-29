@@ -106,6 +106,29 @@ public class ListViewAdapter extends BaseAdapter {
         final DatabaseReference locationPermission = mReference.child("User").child(listViewItem.getFriendName()).child("위치정보요청").child("아이디");
         final DatabaseReference locationPermissionMe = mReference.child("User").child(ToDB.EmailToId).child("위치정보요청").child("아이디");
         final DatabaseReference sharing = mReference.child("User").child(listViewItem.getFriendName()).child("위치정보허용").child("상태");
+        final DatabaseReference sharingMe = mReference.child("User").child(ToDB.EmailToId).child("위치정보허용").child("상태");
+        locationPermission.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String myId = dataSnapshot.getValue(String.class);
+                Log.d(TAG, "에러에러 " + myId);
+
+                if(myId != null && myId.equals(ToDB.EmailToId)){
+                    friendSearchBtn.setVisibility(GONE);
+                    friendSearchingBtn.setVisibility(VISIBLE);
+                    friendLocationApply.setVisibility(GONE);
+                    friendLocationReject.setVisibility(GONE);
+                    locationSharing.setVisibility(GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
         locationPermissionMe.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -145,20 +168,19 @@ public class ListViewAdapter extends BaseAdapter {
                             FragHome.locationPermissionBoolean = true;
                         }
                     });
-
                     friendLocationReject.setOnClickListener(new Button.OnClickListener(){
                         @Override
                         public void onClick(View v){
 
                         }
                     });
+
                 }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
             }
         });
-
         return convertView;
     }
 
@@ -175,9 +197,6 @@ public class ListViewAdapter extends BaseAdapter {
     public void addItem(String name, String photoUrl){
         ListViewItem item = new ListViewItem();
 
-        Log.d(TAG, "순서1");
-        Log.d(TAG, "순서밑에" + photoUrl);
-        Log.d(TAG, "순서밑에" + name);
         item.setIcon(photoUrl);
         item.setFriendName(name);
         listViewItemList.add(item);
