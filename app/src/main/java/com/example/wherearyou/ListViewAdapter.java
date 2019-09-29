@@ -103,14 +103,13 @@ public class ListViewAdapter extends BaseAdapter {
             e.printStackTrace();
         }
 
-        final DatabaseReference locationPermission = mReference.child("User").child(listViewItem.getFriendName()).child("위치정보요청").child("아이디");
-        final DatabaseReference locationPermissionMe = mReference.child("User").child(ToDB.EmailToId).child("위치정보요청").child("아이디");
-        final DatabaseReference sharing = mReference.child("User").child(listViewItem.getFriendName()).child("위치정보허용").child("상태");
-        final DatabaseReference sharingMe = mReference.child("User").child(ToDB.EmailToId).child("위치정보허용").child("상태");
+        final DatabaseReference locationPermission = mReference.child("User").child(listViewItem.getFriendName());
+        final DatabaseReference locationPermissionMe = mReference.child("User").child(ToDB.EmailToId);
+
         locationPermission.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String myId = dataSnapshot.getValue(String.class);
+                String myId = dataSnapshot.child("위치정보요청").child("아이디").getValue(String.class);
                 Log.d(TAG, "에러에러 " + myId);
 
                 if(myId != null && myId.equals(ToDB.EmailToId)){
@@ -128,11 +127,30 @@ public class ListViewAdapter extends BaseAdapter {
             }
         });
 
-
         locationPermissionMe.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String locationPermissionId = dataSnapshot.getValue(String.class);
+                String sharingId = dataSnapshot.child("위치공유중").child("아이디").getValue(String.class);
+
+                if(sharingId != null && sharingId.equals(listViewItem.getFriendName())){
+                    friendSearchBtn.setVisibility(GONE);
+                    friendSearchingBtn.setVisibility(GONE);
+                    friendLocationApply.setVisibility(GONE);
+                    friendLocationReject.setVisibility(GONE);
+                    locationSharing.setVisibility(VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        locationPermissionMe.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+                String locationPermissionId = dataSnapshot.child("위치정보요청").child("아이디").getValue(String.class);
 
                 friendSearchBtn.setOnClickListener(new Button.OnClickListener(){
                     @Override
@@ -143,7 +161,7 @@ public class ListViewAdapter extends BaseAdapter {
                         friendLocationReject.setVisibility(GONE);
                         locationSharing.setVisibility(GONE);
 
-                        locationPermission.setValue(ToDB.EmailToId);
+                        locationPermission.child("위치정보요청").child("아이디").setValue(ToDB.EmailToId);
                     }
                 });
 
@@ -158,14 +176,16 @@ public class ListViewAdapter extends BaseAdapter {
                         @Override
                         public void onClick(View v){
                             // 수락시 상대방에게 동의했다고 알림
-                            sharing.setValue(true);
+                            locationPermission.child("위치정보허용").child("상태").setValue(true);
                             friendSearchBtn.setVisibility(GONE);
                             friendSearchingBtn.setVisibility(GONE);
                             friendLocationApply.setVisibility(GONE);
                             friendLocationReject.setVisibility(GONE);
                             locationSharing.setVisibility(VISIBLE);
 
+                            locationPermission.child("위치공유중").child("아이디").setValue(ToDB.EmailToId);
                             FragHome.locationPermissionBoolean = true;
+                            locationPermissionMe.child("위치정보요청").child("아이디").removeValue();
                         }
                     });
                     friendLocationReject.setOnClickListener(new Button.OnClickListener(){
@@ -174,7 +194,6 @@ public class ListViewAdapter extends BaseAdapter {
 
                         }
                     });
-
                 }
             }
             @Override
