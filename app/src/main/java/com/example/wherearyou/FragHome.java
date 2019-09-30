@@ -287,7 +287,7 @@ public class FragHome extends Fragment implements OnMapReadyCallback, ActivityCo
         fromDB.friendLocation();
         ////////////////////////////////////////////////////////////////////////
 
-        if(locationPermissionBoolean){
+        if(fromDB.sharingFriendName != null){
             if(fromDB.friendLatitude != null && fromDB.friendLongitude != null){
                 LatLng currentLatLng = new LatLng(fromDB.friendLatitude, fromDB.friendLongitude);
                 MarkerOptions markerOptions = new MarkerOptions();

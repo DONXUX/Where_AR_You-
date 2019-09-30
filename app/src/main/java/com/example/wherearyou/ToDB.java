@@ -3,18 +3,13 @@ package com.example.wherearyou;
 import android.location.Location;
 import android.net.Uri;
 
-import androidx.annotation.NonNull;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.sql.Date;
-import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,6 +50,7 @@ public class ToDB{
         DatabaseReference userRef = mRootRef.child("User");
         DatabaseReference nameRef = userRef.child(EmailToId);
         DatabaseReference userNameRef = nameRef.child("이름");
+        //DatabaseReference sharing = nameRef.child("위치정보허용").child("상태");
         DatabaseReference photoRef = nameRef.child("사진");
         DatabaseReference latitudeRef = nameRef.child("위도");
         DatabaseReference longitudeRef = nameRef.child("경도");
@@ -69,5 +65,6 @@ public class ToDB{
         addressRef.setValue(markerTitle);
         timeRef.setValue(getTime);
         idRef.setValue(EmailToId);
+        //sharing.setValue(false);
     }
 }
