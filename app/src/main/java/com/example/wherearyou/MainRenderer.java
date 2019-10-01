@@ -54,6 +54,7 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         mCamera.init();
         mCube.init();
         mPointCloud.init();
+        Log.d("TAG", "MainRenderer onSurfaceCreated 함수 끝");
     }
 
     @Override
@@ -62,10 +63,12 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         mViewportChanged = true;
         mViewportWidth = width;
         mViewportHeight = height;
+        Log.d("TAG", "MainRenderer onSurfaceChanged 함수 끝");
     }
 
     @Override
     public void onDrawFrame(GL10 gl10) {
+        Log.d("TAG", "MainRenderer onDrawFrame 함수 시작");
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         mRenderCallback.preRender();
@@ -74,7 +77,9 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         mCamera.draw();
         GLES20.glDepthMask(true);
 
+        Log.d("TAG", "PointCloud.draw 호출");
         mPointCloud.draw();
+        Log.d("TAG", "mCube draw 호출");
         mCube.draw();
 
         for (int i = 0; i < mSpheres.size(); i++) {
@@ -93,6 +98,8 @@ public class MainRenderer implements GLSurfaceView.Renderer {
             path.update();
             path.draw();
         }
+        Log.d("TAG", "MainRenderer onDrawFrame 함수 끝");
+
     }
 
     public int getTextureId() {
@@ -121,6 +128,7 @@ public class MainRenderer implements GLSurfaceView.Renderer {
             session.setDisplayGeometry(displayRotation, mViewportWidth, mViewportHeight);
             mViewportChanged = false;
         }
+        Log.d("TAG", "MainRenderer updateSession 함수 끝");
     }
 
     public void transformDisplayGeometry(Frame frame) {
@@ -136,6 +144,7 @@ public class MainRenderer implements GLSurfaceView.Renderer {
 
         mPointCloud.setProjectionMatrix(matrix);
         mCube.setProjectionMatrix(matrix);
+        Log.d("TAG", "MainRenderer setProjectionMatrix 함수 끝");
     }
 
     public void setCubeModelMatrix(float[] matrix) {
@@ -153,6 +162,7 @@ public class MainRenderer implements GLSurfaceView.Renderer {
             mPaths.get(i).setViewMatrix(matrix);
         }
         mCube.setViewMatrix(matrix);
+        Log.d("TAG", "updateViewMatrix 함수 끝");
     }
 
     public void setModelMatrix(float[] matrix) {

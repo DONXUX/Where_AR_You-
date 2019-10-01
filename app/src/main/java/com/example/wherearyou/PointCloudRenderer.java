@@ -94,6 +94,7 @@ public class PointCloudRenderer {
     }
 
     public void draw() {
+        Log.d("TAG", "PointCloudRenerer draw 함수 시작");
         float[] mvpMatrix = new float[16];
         Matrix.multiplyMM(mvpMatrix, 0, mProjMatrix, 0, mViewMatrix, 0);
 
@@ -114,6 +115,7 @@ public class PointCloudRenderer {
         GLES20.glDrawArrays(GLES20.GL_POINTS, 0, mNumPoints);
         GLES20.glDisableVertexAttribArray(position);
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        Log.d("TAG", "PointCloudRenerer draw 함수 끝");
     }
 
     public void setProjectionMatrix(float[] projMatrix) {

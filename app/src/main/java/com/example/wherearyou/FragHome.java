@@ -42,9 +42,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.List;
@@ -98,6 +95,7 @@ public class FragHome extends Fragment implements OnMapReadyCallback, ActivityCo
             @Override
             public void onClick(View v){
                 Intent intent = new Intent(getActivity(), CameraMap.class);
+                Log.d("카메라 맵 실행", "카메라 맵 실행");
                 startActivity(intent);
             }
         });

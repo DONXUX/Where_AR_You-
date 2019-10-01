@@ -14,6 +14,7 @@ import java.nio.ShortBuffer;
 public class Cube {
     private static final String TAG = Cube.class.getSimpleName();
 
+    // vertex 쉐이더 코드
     private final String vertexShaderString =
             "attribute vec3 aPosition;\n" +
                     "attribute vec4 aColor;\n" +
@@ -24,6 +25,7 @@ public class Cube {
                     "  gl_Position = uMvpMatrix * vec4(aPosition.x, aPosition.y, aPosition.z, 1.0);\n" +
                     "}";
 
+    // fragment 쉐이더 코드
     private final String fragmentShaderString =
             "precision mediump float;\n" +
                     "varying vec4 vColor;\n" +
@@ -41,6 +43,7 @@ public class Cube {
     private FloatBuffer mColors;
     private ShortBuffer mIndices;
 
+    // 정점 배열
     private float vertices[] = {
             -0.5f, 0.0f, -0.5f,
             0.5f, 0.0f, -0.5f,
@@ -51,6 +54,7 @@ public class Cube {
             0.5f, 1.0f,  0.5f,
             -0.5f, 1.0f,  0.5f
     };
+    // 인덱스 배열
     private short indices[] = {
             0, 5, 4, 0, 1, 5,
             1, 6, 5, 1, 2, 6,
@@ -84,8 +88,11 @@ public class Cube {
             colors[4 * i + 3] = alpha;
         }
 
+        // ByteBuffer를 할당 받아 사용할 엔디안을 지정하고 FloatBuffer로 변환
         mVertices = ByteBuffer.allocateDirect(vertices.length * Float.SIZE / 8).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        // float 배열에 정의된 좌표들을 FloatBuffer에 저장
         mVertices.put(scaledVertices);
+        // 읽어올 버퍼의 위치를 0으로 설정. 첫번째 좌표부터 읽어오게됨.
         mVertices.position(0);
 
         mColors = ByteBuffer.allocateDirect(colors.length * Float.SIZE / 8).order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -98,6 +105,7 @@ public class Cube {
     }
 
     public void init() {
+        // vertex 쉐이더 컴파일
         int vShader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
         GLES20.glShaderSource(vShader, vertexShaderString);
         GLES20.glCompileShader(vShader);
@@ -108,6 +116,7 @@ public class Cube {
             GLES20.glDeleteShader(vShader);
         }
 
+        // fragment 쉐이더 컴파일
         int fShader = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
         GLES20.glShaderSource(fShader, fragmentShaderString);
         GLES20.glCompileShader(fShader);
@@ -118,8 +127,10 @@ public class Cube {
         }
 
         mProgram = GLES20.glCreateProgram();
+        // vertex 쉐이더와 fragment 쉐이더를 program 객체에 추가
         GLES20.glAttachShader(mProgram, vShader);
         GLES20.glAttachShader(mProgram, fShader);
+        // program 객체를 OpenGL에 연결. program에 추가된 쉐이더들이 OpenGL에 연결됨.
         GLES20.glLinkProgram(mProgram);
         int[] linked = new int[1];
         GLES20.glGetProgramiv(mProgram, GLES20.GL_LINK_STATUS, linked, 0);
@@ -129,9 +140,13 @@ public class Cube {
     }
 
     public void draw() {
+        Log.d("TAG", "Cube draw 함수 시작");
+        // 렌더링 상태의 일부분으로 program을 추가한다.
         GLES20.glUseProgram(mProgram);
 
+        // program 객체로부터 vertex 쉐이더의 aPosition 멤버에 대한 핸들을 가져옴
         int position = GLES20.glGetAttribLocation(mProgram, "aPosition");
+        // program 객체로부터 fragment 쉐이더의 aColor 멤버에 대한 핸들을 가져옴
         int color = GLES20.glGetAttribLocation(mProgram, "aColor");
         int mvp = GLES20.glGetUniformLocation(mProgram, "uMvpMatrix");
 
@@ -142,15 +157,19 @@ public class Cube {
 
         GLES20.glUniformMatrix4fv(mvp, 1, false, mvpMatrix, 0);
 
+        // 메모리 위반 용의자!!!
         GLES20.glEnableVertexAttribArray(position);
         GLES20.glVertexAttribPointer(position, 3, GLES20.GL_FLOAT, false, 4 * 3, mVertices);
 
         GLES20.glEnableVertexAttribArray(color);
         GLES20.glVertexAttribPointer(color, 4, GLES20.GL_FLOAT, false, 4 * 4, mColors);
 
+        Log.d("TAG", "오류 발생 지점");
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, 36, GLES20.GL_UNSIGNED_SHORT, mIndices);
+        Log.d("TAG", "오류 발생 지점 넘어감");
 
         GLES20.glDisableVertexAttribArray(position);
+        Log.d("TAG", "Cube draw 함수 끝");
     }
 
     public void setModelMatrix(float[] modelMatrix) {

@@ -32,7 +32,7 @@ import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 
 public class CameraMap extends Activity {
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = CameraMap.class.getSimpleName();
 
     private CheckBox mCheckBox;
     private GLSurfaceView mSurfaceView;
@@ -88,6 +88,7 @@ public class CameraMap extends Activity {
             // Renderer에서 생성한 텍슻쳐를 Session 객체와 연결 ->
             // 새로운 프레임이 그려질 때마다 Session 객체 업데이트
             public void preRender() {
+                Log.d("TAG", "CameraMap 내 MainRenderer preRender 함수 시작");
                 if (mRenderer.isViewportChanged()) {
                     Display display = getWindowManager().getDefaultDisplay();
                     int displayRotation = display.getRotation();
@@ -139,12 +140,16 @@ public class CameraMap extends Activity {
                 float[] modelMatrix = new float[16];
                 pose.toMatrix(modelMatrix, 0);
                 mRenderer.setCubeModelMatrix(modelMatrix);
+                Log.d("TAG", "CameraMap 내 MainRenderer preRender 함수 끝");
             }
         });
         mSurfaceView.setPreserveEGLContextOnPause(true);
         mSurfaceView.setEGLContextClientVersion(2);
         mSurfaceView.setRenderer(mRenderer);
         mSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+
+        Log.d(TAG, "onCreate 끝");
+
     }
 
     @Override
@@ -153,6 +158,7 @@ public class CameraMap extends Activity {
 
         mSurfaceView.onPause();
         mSession.pause();
+        Log.d(TAG, "onPause 끝");
     }
 
     @Override
@@ -201,6 +207,7 @@ public class CameraMap extends Activity {
             e.printStackTrace();
         }
 
+        Log.d(TAG, "onResume 끝");
         mSurfaceView.onResume();
     }
 
@@ -289,6 +296,7 @@ public class CameraMap extends Activity {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA}, 0);
         }
+        Log.d("카메라 권한 부여", " 권한부여 됨");
     }
 
     // 타이틀 바 제거

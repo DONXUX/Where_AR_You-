@@ -97,6 +97,7 @@ public class CameraRenderer {
         if (linked[0] == 0) {
             Log.e(TAG, "Could not link program.");
         }
+        Log.d(TAG, "CameraRenderer init 함수 끝");
     }
 
     public void draw() {
@@ -117,6 +118,7 @@ public class CameraRenderer {
 
         GLES20.glDisableVertexAttribArray(position);
         GLES20.glDisableVertexAttribArray(texcoord);
+        Log.d(TAG, "CameraRenderer draw 함수 끝");
     }
 
     public int getTextureId() {
@@ -125,5 +127,6 @@ public class CameraRenderer {
 
     public void transformDisplayGeometry(Frame frame) {
         frame.transformDisplayUvCoords(mTexCoords, mTexCoordsTransformed);
+        Log.d(TAG, "CameraRenderer transformDisplayGeometry 함수 끝");
     }
 }
