@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -35,6 +36,7 @@ import static com.example.wherearyou.MainActivity.fragHome;
 
 public class ListViewAdapter extends BaseAdapter {
     Bitmap bitmap;
+    String friendNameRef;
     private ArrayList<ListViewItem> listViewItemList = new ArrayList<ListViewItem>();
 
     public ListViewAdapter(){ }
@@ -130,7 +132,24 @@ public class ListViewAdapter extends BaseAdapter {
         locationPermissionMe.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String sharingId = dataSnapshot.child("위치공유중").child("아이디").getValue(String.class);
+                final String sharingId = dataSnapshot.child("위치공유중").child("아이디").getValue(String.class);
+
+                friendSearchBtn.setOnClickListener(new Button.OnClickListener(){
+                    @Override
+                    public void onClick(View v){
+                        if(sharingId != null){
+                            Toast.makeText(context, "현재 다른 위치정보를 받고 있습니다.", Toast.LENGTH_SHORT).show();
+                        }else{
+                            friendSearchBtn.setVisibility(GONE);
+                            friendSearchingBtn.setVisibility(VISIBLE);
+                            friendLocationApply.setVisibility(GONE);
+                            friendLocationReject.setVisibility(GONE);
+                            locationSharing.setVisibility(GONE);
+
+                            locationPermission.child("위치정보요청").child("아이디").setValue(ToDB.EmailToId);
+                        }
+                    }
+                });
 
                 if(sharingId != null && sharingId.equals(listViewItem.getFriendName())){
                     friendSearchBtn.setVisibility(GONE);
@@ -152,16 +171,17 @@ public class ListViewAdapter extends BaseAdapter {
             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
                 String locationPermissionId = dataSnapshot.child("위치정보요청").child("아이디").getValue(String.class);
 
-                friendSearchBtn.setOnClickListener(new Button.OnClickListener(){
+                locationSharing.setOnClickListener(new Button.OnClickListener(){
                     @Override
                     public void onClick(View v){
-                        friendSearchBtn.setVisibility(GONE);
-                        friendSearchingBtn.setVisibility(VISIBLE);
+                        friendSearchBtn.setVisibility(VISIBLE);
+                        friendSearchingBtn.setVisibility(GONE);
                         friendLocationApply.setVisibility(GONE);
                         friendLocationReject.setVisibility(GONE);
                         locationSharing.setVisibility(GONE);
-
-                        locationPermission.child("위치정보요청").child("아이디").setValue(ToDB.EmailToId);
+                        FragHome.locationPermissionBoolean = false;
+                        locationPermissionMe.child("위치정보허용").child("상태").setValue(false);
+                        locationPermissionMe.child("위치공유중").child("아이디").removeValue();
                     }
                 });
 
@@ -184,14 +204,33 @@ public class ListViewAdapter extends BaseAdapter {
                             locationSharing.setVisibility(VISIBLE);
 
                             locationPermission.child("위치공유중").child("아이디").setValue(ToDB.EmailToId);
+                            locationPermissionMe.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    friendNameRef = dataSnapshot.getValue(String.class);
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                            locationPermissionMe.child("위치공유중").child("아이디").setValue(friendNameRef);
                             FragHome.locationPermissionBoolean = true;
                             locationPermissionMe.child("위치정보요청").child("아이디").removeValue();
                         }
                     });
+
                     friendLocationReject.setOnClickListener(new Button.OnClickListener(){
                         @Override
                         public void onClick(View v){
-
+                            friendSearchBtn.setVisibility(VISIBLE);
+                            friendSearchingBtn.setVisibility(GONE);
+                            friendLocationApply.setVisibility(GONE);
+                            friendLocationReject.setVisibility(GONE);
+                            locationSharing.setVisibility(GONE);
+                            FragHome.locationPermissionBoolean = false;
+                            locationPermissionMe.child("위치정보요청").child("아이디").removeValue();
                         }
                     });
                 }
