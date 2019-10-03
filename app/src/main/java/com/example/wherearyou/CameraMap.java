@@ -9,10 +9,12 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -30,6 +32,7 @@ import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
+import com.google.ar.sceneform.rendering.ModelRenderable;
 
 public class CameraMap extends Activity {
     private static final String TAG = CameraMap.class.getSimpleName();
@@ -37,6 +40,7 @@ public class CameraMap extends Activity {
     private CheckBox mCheckBox;
     private GLSurfaceView mSurfaceView;
     private MainRenderer mRenderer;
+    private ModelRenderable modelRenderable;
 
     private boolean mUserRequestedInstall = true;
 
@@ -147,6 +151,18 @@ public class CameraMap extends Activity {
         mSurfaceView.setEGLContextClientVersion(2);
         mSurfaceView.setRenderer(mRenderer);
         mSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+
+        ModelRenderable.builder()
+                .setSource(this, R.raw.splorgdiamond)
+                .build()
+                .thenAccept(renderable -> modelRenderable = renderable)
+                .exceptionally(throwable -> {
+                    Toast toast = Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    return null;
+                });
+
 
         Log.d(TAG, "onCreate 끝");
 

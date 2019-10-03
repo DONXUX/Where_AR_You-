@@ -16,6 +16,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
 }
 
 dependencies {
@@ -40,3 +44,15 @@ dependencies {
 }
 
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.ar.sceneform.plugin'
+
+
+sceneform.asset('sampleData/models/splorgdiamond.obj',
+        'default',
+        'sampleData/models/splorgdiamond.sfa',
+        'src/main/assets/splorgdiamond')
+
+sceneform.asset('sampleData/models/splorgdiamond.obj',
+        'default',
+        'sampleData/models/splorgdiamond.sfa',
+        'src/main/raw/splorgdiamond')

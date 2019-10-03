@@ -1,0 +1,42 @@
+{
+  materials: [
+    {
+      name: 'Material.001',
+      parameters: [
+        {
+          baseColor: null,
+        },
+        {
+          baseColorTint: [
+            0.64000000000000001,
+            0.64000000000000001,
+            0.64000000000000001,
+            1,
+          ],
+        },
+        {
+          metallic: 0,
+        },
+        {
+          roughness: 1,
+        },
+        {
+          opacity: 0.34736800000000001,
+        },
+      ],
+      source: 'build/sceneform_sdk/default_materials/obj_material.sfm',
+    },
+  ],
+  model: {
+    attributes: [
+      'Position',
+      'Orientation',
+    ],
+    collision: {},
+    file: 'sampleData/models/splorgdiamond.obj',
+    name: 'splorgdiamond',
+    recenter: 'root',
+    scale: 0.71428599999999998,
+  },
+  version: '0.54:2',
+}
