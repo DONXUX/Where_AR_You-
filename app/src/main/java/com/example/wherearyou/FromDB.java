@@ -40,6 +40,7 @@ public class FromDB {
                     DatabaseReference idRef = nameRef.child("이름");
                     DatabaseReference latitudeRef = nameRef.child("위도");
                     DatabaseReference longitudeRef = nameRef.child("경도");
+
                     DatabaseReference addressRef = nameRef.child("주소");
                     DatabaseReference timeRef = nameRef.child("시간");
 

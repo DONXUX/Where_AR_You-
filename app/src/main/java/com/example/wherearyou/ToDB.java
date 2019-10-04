@@ -21,6 +21,8 @@ public class ToDB{
     public static String EmailToId;
     public String userName;
     public Uri photoUri;
+    public double latitude;
+    public double longitude;
 
     //////////////////////현재시간//////////////////////
     long now = System.currentTimeMillis();
@@ -60,6 +62,8 @@ public class ToDB{
 
         userNameRef.setValue(user.getDisplayName());
         photoRef.setValue(photoUri.toString());
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
         latitudeRef.setValue(location.getLatitude());
         longitudeRef.setValue(location.getLongitude());
         addressRef.setValue(markerTitle);

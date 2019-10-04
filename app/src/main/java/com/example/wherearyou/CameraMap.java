@@ -9,16 +9,16 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
@@ -33,9 +33,16 @@ import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 import com.google.ar.sceneform.rendering.ModelRenderable;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class CameraMap extends Activity {
     private static final String TAG = CameraMap.class.getSimpleName();
+
+    private DatabaseReference mReference;
 
     private CheckBox mCheckBox;
     private GLSurfaceView mSurfaceView;
@@ -55,6 +62,17 @@ public class CameraMap extends Activity {
     private float[] mLastPoint = new float[] { 0.0f, 0.0f, 0.0f };
     private boolean mNewPath = false;
     private boolean mPointAdded = false;
+
+    String userId;
+    String friendId;
+    private LatLng userLocation;
+    private LatLng friendLocation;
+
+    private ToDB toDB;
+    private FromDB fromDB;
+    private FragHome fragHome;
+    private float[] userLat = new float[1];
+    private float[] userLon = new float[1];
 
     private static float MIN_DISTANCE = 0.000625f;
 
@@ -128,10 +146,31 @@ public class CameraMap extends Activity {
                 mRenderer.setProjectionMatrix(mProjMatrix);
                 mRenderer.updateViewMatrix(mViewMatrix);
 
+                // 내 위치 불러오기
+                mReference = FirebaseDatabase.getInstance().getReference();
+                userId = toDB.EmailToId;
+                mReference.child("User").child(userId).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        userLat[0] = Float.parseFloat(dataSnapshot.child("위도").getValue().toString());
+                        userLon[0] = Float.parseFloat(dataSnapshot.child("경도").getValue().toString());
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+                // 두 좌표 위도, 경도를 이용하여 방위각 계산
+                userLocation = new LatLng(userLat[0], userLon[0]);
+                friendLocation = new LatLng(fromDB.friendLatitude, fromDB.friendLongitude);
+                double azimuth = getAzimuth(userLocation, friendLocation);
+                Log.d("방위각 : ", Double.toString(azimuth));
+
+                //TODO : 방위각을 x좌표로 변환 (75도 넘어갈 시 화면에 보이지 않음)
 
                 // 스크린 상의 좌표 보다 조금 앞에 있는 터치된 3차원 좌표 값을 구하는 함수(허공)
-                //TODO : GPS 친구 좌표 -> 화면의 방향 좌표로 전환
-                //TODO : 친구좌표를 전달
                 float[] screenPoint = getScreenPoint(mLastX, 300.0f,
                         mRenderer.getWidth(), mRenderer.getHeight(),
                         mProjMatrix, mViewMatrix);
@@ -152,20 +191,7 @@ public class CameraMap extends Activity {
         mSurfaceView.setRenderer(mRenderer);
         mSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
-        ModelRenderable.builder()
-                .setSource(this, R.raw.splorgdiamond)
-                .build()
-                .thenAccept(renderable -> modelRenderable = renderable)
-                .exceptionally(throwable -> {
-                    Toast toast = Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
-                    toast.show();
-                    return null;
-                });
-
-
         Log.d(TAG, "onCreate 끝");
-
     }
 
     @Override
@@ -320,5 +346,28 @@ public class CameraMap extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    }
+
+    // 방위각 계산 함수 (drgree 단위 반환)
+    private double getAzimuth(LatLng location1, LatLng location2) {
+        // 라디안 각도로 변환
+        double CurLatRad = location1.latitude * (Math.PI / 180);
+        double CurLonRad = location1.longitude * (Math.PI / 180);
+        double DestLatRad = location1.latitude * (Math.PI / 180);
+        double DestLonRad = location1.longitude * (Math.PI / 180);
+
+        double radianDistance = 0;
+        radianDistance = Math.acos(Math.sin(CurLatRad) * Math.sin(DestLatRad) + Math.cos(CurLatRad) * Math.cos(DestLatRad) * Math.cos(CurLonRad - DestLatRad));
+        // 목적지 이동 방향 구하기
+        double radianBearing = Math.acos((Math.sin(DestLatRad) - Math.sin(CurLatRad) * Math.cos(radianDistance)) / (Math.cos(CurLatRad) * Math.sin(radianDistance)));
+        double trueBearing = 0;
+        if(Math.sin(DestLonRad - CurLonRad) < 0) {
+            trueBearing = radianBearing * (180/Math.PI);
+            trueBearing = 360 - trueBearing;
+        }
+        else {
+            trueBearing = radianBearing * (180 / Math.PI);
+        }
+        return trueBearing;
     }
 }
