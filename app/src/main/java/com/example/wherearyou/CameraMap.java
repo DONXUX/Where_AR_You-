@@ -84,10 +84,11 @@ public class CameraMap extends Activity implements SensorEventListener {
     Sensor accelerometer;
     Sensor magnetometer;
     double myAzimuth;
+    double azimuth;
+    double diffAzimuth;
 
     float[] mGravity;
     float[] mGeomagnetic;
-    float azimuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,8 +182,10 @@ public class CameraMap extends Activity implements SensorEventListener {
                 // 두 좌표 위도, 경도를 이용하여 방위각 계산
                 userLocation = new LatLng(userLat[0], userLon[0]);
                 friendLocation = new LatLng(fromDB.friendLatitude, fromDB.friendLongitude);
-                double azimuth = getAzimuth(userLocation, friendLocation);
+                azimuth = getAzimuth(userLocation, friendLocation);
+                diffAzimuth = Math.abs(azimuth - myAzimuth);
                 Log.d("방위각1 : ", Double.toString(azimuth));
+                Log.d("방위각 차이 : ", Double.toString(diffAzimuth));
 
                 //TODO : 방위각을 x좌표로 변환 (75도 넘어갈 시 화면에 보이지 않음)
 
@@ -380,18 +383,17 @@ public class CameraMap extends Activity implements SensorEventListener {
         // 목적지 이동 방향 구하기
         double radianBearing = Math.acos((Math.sin(DestLatRad) - Math.sin(CurLatRad) * Math.cos(radianDistance)) / (Math.cos(CurLatRad) * Math.sin(radianDistance)));
         double trueBearing = 0;
-        if(Math.sin(DestLonRad - CurLonRad) < 0) {
+       /* if(Math.sin(DestLonRad - CurLonRad) < 0) {
             trueBearing = radianBearing * (180 / Math.PI);
             trueBearing = 360 - trueBearing;
         }
-        else {
-            trueBearing = radianBearing * (180 / Math.PI);
-        }
+        else {*/
+            trueBearing = 360 - (radianBearing * (180 / Math.PI));
+        //}
         return trueBearing;
     }
 
     public void onSensorChanged(SensorEvent event){
-
         if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             mGravity = event.values;
         }
@@ -406,7 +408,7 @@ public class CameraMap extends Activity implements SensorEventListener {
                 float[] orientation = new float[3];
                 SensorManager.getOrientation(R, orientation);
                 azimuth = orientation[0];
-                myAzimuth = azimuth * (180 / Math.PI);
+                myAzimuth = 360 - (azimuth * (180 / Math.PI));
                 Log.d("내 방위각 : ", Double.toString(myAzimuth));
 
             }
