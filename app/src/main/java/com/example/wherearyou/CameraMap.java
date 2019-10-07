@@ -3,6 +3,10 @@ package com.example.wherearyou;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.hardware.display.DisplayManager;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -39,7 +43,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class CameraMap extends Activity {
+public class CameraMap extends Activity implements SensorEventListener {
     private static final String TAG = CameraMap.class.getSimpleName();
 
     private DatabaseReference mReference;
@@ -76,6 +80,15 @@ public class CameraMap extends Activity {
 
     private static float MIN_DISTANCE = 0.000625f;
 
+    SensorManager mSensorManager;
+    Sensor accelerometer;
+    Sensor magnetometer;
+    double myAzimuth;
+
+    float[] mGravity;
+    float[] mGeomagnetic;
+    float azimuth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +96,9 @@ public class CameraMap extends Activity {
         setContentView(R.layout.activity_camera_map);
 
         mSurfaceView = (GLSurfaceView) findViewById(R.id.gl_surface_view);
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
         DisplayManager displayManager = (DisplayManager) getSystemService(DISPLAY_SERVICE);
         if (displayManager != null) {
@@ -166,7 +182,7 @@ public class CameraMap extends Activity {
                 userLocation = new LatLng(userLat[0], userLon[0]);
                 friendLocation = new LatLng(fromDB.friendLatitude, fromDB.friendLongitude);
                 double azimuth = getAzimuth(userLocation, friendLocation);
-                Log.d("방위각 : ", Double.toString(azimuth));
+                Log.d("방위각1 : ", Double.toString(azimuth));
 
                 //TODO : 방위각을 x좌표로 변환 (75도 넘어갈 시 화면에 보이지 않음)
 
@@ -208,6 +224,9 @@ public class CameraMap extends Activity {
         super.onResume();
 
         requestCameraPermission();
+
+        mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
+        mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
 
         try {
             if (mSession == null) {
@@ -362,12 +381,39 @@ public class CameraMap extends Activity {
         double radianBearing = Math.acos((Math.sin(DestLatRad) - Math.sin(CurLatRad) * Math.cos(radianDistance)) / (Math.cos(CurLatRad) * Math.sin(radianDistance)));
         double trueBearing = 0;
         if(Math.sin(DestLonRad - CurLonRad) < 0) {
-            trueBearing = radianBearing * (180/Math.PI);
+            trueBearing = radianBearing * (180 / Math.PI);
             trueBearing = 360 - trueBearing;
         }
         else {
             trueBearing = radianBearing * (180 / Math.PI);
         }
         return trueBearing;
+    }
+
+    public void onSensorChanged(SensorEvent event){
+
+        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            mGravity = event.values;
+        }
+        if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            mGeomagnetic = event.values;
+        }
+        if(mGravity != null && mGeomagnetic != null) {
+            float[] R = new float[9];
+            float[] I = new float[9];
+            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+            if(success){
+                float[] orientation = new float[3];
+                SensorManager.getOrientation(R, orientation);
+                azimuth = orientation[0];
+                myAzimuth = azimuth * (180 / Math.PI);
+                Log.d("내 방위각 : ", Double.toString(myAzimuth));
+
+            }
+        }
+    }
+
+    public void onAccuracyChanged(Sensor sensor, int accuracy){
+
     }
 }
