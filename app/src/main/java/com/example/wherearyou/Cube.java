@@ -141,7 +141,6 @@ public class Cube {
     }
 
     public void draw() {
-        Log.d("TAG", "Cube draw 함수 시작");
         // 렌더링 상태의 일부분으로 program을 추가한다.
         GLES20.glUseProgram(mProgram);
 
@@ -158,19 +157,15 @@ public class Cube {
 
         GLES20.glUniformMatrix4fv(mvp, 1, false, mvpMatrix, 0);
 
-        // 메모리 위반 용의자!!!
         GLES20.glEnableVertexAttribArray(position);
         GLES20.glVertexAttribPointer(position, 3, GLES20.GL_FLOAT, false, 4 * 3, mVertices);
 
         GLES20.glEnableVertexAttribArray(color);
         GLES20.glVertexAttribPointer(color, 4, GLES20.GL_FLOAT, false, 4 * 4, mColors);
 
-        Log.d("TAG", "오류 발생 지점");
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, 36, GLES20.GL_UNSIGNED_SHORT, mIndices);
-        Log.d("TAG", "오류 발생 지점 넘어감");
 
         GLES20.glDisableVertexAttribArray(position);
-        Log.d("TAG", "Cube draw 함수 끝");
     }
 
     public void setModelMatrix(float[] modelMatrix) {

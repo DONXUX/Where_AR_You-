@@ -127,7 +127,6 @@ public class CameraMap extends Activity implements SensorEventListener {
             // Renderer에서 생성한 텍슻쳐를 Session 객체와 연결 ->
             // 새로운 프레임이 그려질 때마다 Session 객체 업데이트
             public void preRender() {
-                Log.d("TAG", "CameraMap 내 MainRenderer preRender 함수 시작");
                 if (mRenderer.isViewportChanged()) {
                     Display display = getWindowManager().getDefaultDisplay();
                     int displayRotation = display.getRotation();
@@ -183,14 +182,18 @@ public class CameraMap extends Activity implements SensorEventListener {
                 userLocation = new LatLng(userLat[0], userLon[0]);
                 friendLocation = new LatLng(fromDB.friendLatitude, fromDB.friendLongitude);
                 azimuth = getAzimuth(userLocation, friendLocation);
-                diffAzimuth = Math.abs(azimuth - myAzimuth);
-                Log.d("방위각1 : ", Double.toString(azimuth));
+                diffAzimuth = azimuth - myAzimuth;
+                //Log.d("방위각1 : ", Double.toString(azimuth));
                 Log.d("방위각 차이 : ", Double.toString(diffAzimuth));
 
                 //TODO : 방위각을 x좌표로 변환 (75도 넘어갈 시 화면에 보이지 않음)
-
+                float friendX = ((float)diffAzimuth * 10.0f) + 750.0f;
+                if(friendX > 1400.0f)
+                    friendX = 1400.0f;
+                if(friendX < 0.0f)
+                    friendX = 0.0f;
                 // 스크린 상의 좌표 보다 조금 앞에 있는 터치된 3차원 좌표 값을 구하는 함수(허공)
-                float[] screenPoint = getScreenPoint(mLastX, 300.0f,
+                float[] screenPoint = getScreenPoint(friendX, 300.0f,
                         mRenderer.getWidth(), mRenderer.getHeight(),
                         mProjMatrix, mViewMatrix);
 
@@ -202,7 +205,6 @@ public class CameraMap extends Activity implements SensorEventListener {
                 float[] modelMatrix = new float[16];
                 pose.toMatrix(modelMatrix, 0);
                 mRenderer.setCubeModelMatrix(modelMatrix);
-                Log.d("TAG", "CameraMap 내 MainRenderer preRender 함수 끝");
             }
         });
         mSurfaceView.setPreserveEGLContextOnPause(true);
@@ -216,7 +218,8 @@ public class CameraMap extends Activity implements SensorEventListener {
     @Override
     protected void onPause() {
         super.onPause();
-
+        mSensorManager.unregisterListener(this, accelerometer);
+        mSensorManager.unregisterListener(this, magnetometer);
         mSurfaceView.onPause();
         mSession.pause();
         Log.d(TAG, "onPause 끝");
@@ -228,8 +231,8 @@ public class CameraMap extends Activity implements SensorEventListener {
 
         requestCameraPermission();
 
-        mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
-        mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
+        mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
+        mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_GAME);
 
         try {
             if (mSession == null) {
@@ -383,13 +386,13 @@ public class CameraMap extends Activity implements SensorEventListener {
         // 목적지 이동 방향 구하기
         double radianBearing = Math.acos((Math.sin(DestLatRad) - Math.sin(CurLatRad) * Math.cos(radianDistance)) / (Math.cos(CurLatRad) * Math.sin(radianDistance)));
         double trueBearing = 0;
-       /* if(Math.sin(DestLonRad - CurLonRad) < 0) {
+        if(Math.sin(DestLonRad - CurLonRad) < 0) {
+            trueBearing = radianBearing * (180 / Math.PI);
+        }
+        else {
             trueBearing = radianBearing * (180 / Math.PI);
             trueBearing = 360 - trueBearing;
         }
-        else {*/
-            trueBearing = 360 - (radianBearing * (180 / Math.PI));
-        //}
         return trueBearing;
     }
 
@@ -402,14 +405,20 @@ public class CameraMap extends Activity implements SensorEventListener {
         }
         if(mGravity != null && mGeomagnetic != null) {
             float[] R = new float[9];
+            float[] reR = new float[9];
             float[] I = new float[9];
+            float inclination;
             boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
             if(success){
                 float[] orientation = new float[3];
-                SensorManager.getOrientation(R, orientation);
-                azimuth = orientation[0];
-                myAzimuth = 360 - (azimuth * (180 / Math.PI));
-                Log.d("내 방위각 : ", Double.toString(myAzimuth));
+                inclination = SensorManager.getInclination(I);
+                SensorManager.remapCoordinateSystem(R, SensorManager.AXIS_X, SensorManager.AXIS_Z, reR);
+                SensorManager.getOrientation(reR, orientation);
+                azimuth = (Math.toDegrees(orientation[0]) + 360) % 360;
+                myAzimuth = azimuth;
+                //Log.d("오리엔테이션 : ", Double.toString(myAzimuth));
+                // myAzimuth = azimuth;
+                //Log.d("내 방위각 : ", Double.toString(myAzimuth));
 
             }
         }
