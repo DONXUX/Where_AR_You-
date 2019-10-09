@@ -68,7 +68,7 @@ public class Cube {
     public static final int GREEN = 1;
     public static final int BLUE = 2;
     public static final int ALPHA = 3;
-    private float[] mColor = new float[]{0.0f, 0.0f, 0.0f, 1.0f};
+    private float[] mColor = new float[]{0.6f, 0.7f, 0.2f, 1.0f};
 
     public Cube(float scale, int color, float alpha) {
         float[] scaledVertices = new float[3 * 8];
@@ -98,7 +98,7 @@ public class Cube {
 
         mColors = ByteBuffer.allocateDirect(colors.length * Float.SIZE / 8).order(ByteOrder.nativeOrder()).asFloatBuffer();
         mColors.put(colors);
-        mColors.position(0);
+        mColors.position(3);
 
         mIndices = ByteBuffer.allocateDirect(indices.length * Short.SIZE / 8).order(ByteOrder.nativeOrder()).asShortBuffer();
         mIndices.put(indices);
