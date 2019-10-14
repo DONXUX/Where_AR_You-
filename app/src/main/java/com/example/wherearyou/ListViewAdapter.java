@@ -204,18 +204,7 @@ public class ListViewAdapter extends BaseAdapter {
                             locationSharing.setVisibility(VISIBLE);
 
                             locationPermission.child("위치공유중").child("아이디").setValue(ToDB.EmailToId);
-                            locationPermissionMe.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    friendNameRef = dataSnapshot.getValue(String.class);
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                }
-                            });
-                            locationPermissionMe.child("위치공유중").child("아이디").setValue(friendNameRef);
+                            locationPermissionMe.child("위치공유중").child("아이디").setValue(listViewItem.getFriendName());
                             FragHome.locationPermissionBoolean = true;
                             locationPermissionMe.child("위치정보요청").child("아이디").removeValue();
                         }
